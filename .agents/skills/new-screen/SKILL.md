@@ -25,7 +25,7 @@ Before building or changing ANY screen, in this order:
    - Read ONLY that specific frame, not the entire file.
 5. **Reconcile sources**:
    - If sources disagree, do not guess: prefer live Figma values, use PNG to check the look, and list every disagreement in the final report.
-   - If any source is missing or the Figma MCP does not work, stop and ask the user before continuing.
+   - If the Figma MCP fails or is rate limited, continue with the PNG and .dart export, and mention it in the report. Do not stop to ask. For screens with no PNG, use the .dart export only. If something is unclear, make the most reasonable choice and list all assumptions in the report.
 
 ## Step 2: Documentation (Plan Checklist First)
 - Create or update `docs/screens/<screen-name>.md` with status `DRAFT` and a detailed `Plan` checklist before writing any code.
