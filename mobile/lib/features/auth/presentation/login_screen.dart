@@ -3,8 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/widgets/app_text_field.dart';
+import '../../../shared/widgets/app_password_field.dart';
+import '../../../shared/widgets/primary_button.dart';
+import '../../../shared/widgets/secondary_button.dart';
 import 'auth_controller.dart';
 
+/// Login Screen strictly matching Figma 03_login.png and Day-Balance Style Guide.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -13,24 +18,79 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+
+  String? _emailError;
+  String? _passwordError;
+  String? _generalError;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
+  void _clearErrors() {
+    if (_emailError != null || _passwordError != null || _generalError != null) {
+      setState(() {
+        _emailError = null;
+        _passwordError = null;
+        _generalError = null;
+      });
+    }
+  }
+
+  bool _validateFields() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    bool isValid = true;
+    String? emailErr;
+    String? passwordErr;
+
+    if (email.isEmpty) {
+      emailErr = 'Enter your email address';
+      isValid = false;
+    } else {
+      final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+      if (!emailRegex.hasMatch(email)) {
+        emailErr = 'Enter a valid email address';
+        isValid = false;
+      }
+    }
+
+    if (password.isEmpty) {
+      passwordErr = 'Enter your password';
+      isValid = false;
+    } else if (password.length < 8) {
+      passwordErr = 'Password must be at least 8 characters';
+      isValid = false;
+    }
+
+    setState(() {
+      _emailError = emailErr;
+      _passwordError = passwordErr;
+      _generalError = null;
+    });
+
+    return isValid;
+  }
+
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+    _clearErrors();
+    if (!_validateFields()) return;
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
 
     final success = await ref.read(authControllerProvider.notifier).login(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
+          email: email,
+          password: password,
         );
 
     if (!mounted) return;
@@ -42,214 +102,200 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       } else {
         context.go('/onboarding/schedule');
       }
+    } else {
+      final errorMessage = ref.read(authControllerProvider).errorMessage ?? '';
+      setState(() {
+        if (errorMessage.toLowerCase().contains('invalid') ||
+            errorMessage.toLowerCase().contains('password') ||
+            errorMessage.toLowerCase().contains('email')) {
+          // Exact text shown in Figma 03_login.png
+          _passwordError =
+              'That password doesn’t match this email. Try again or reset it below.';
+        } else {
+          _generalError = errorMessage;
+        }
+      });
     }
+  }
+
+  void _handleForgotPassword() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Password reset will be available soon. Please contact support if you need help.',
+          style: AppTextStyles.body14.copyWith(color: AppColors.white),
+        ),
+        backgroundColor: AppColors.text,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final isLoading = authState.isLoading;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.canvas,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 24),
-                  // App Icon / Logo
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 16,
-                          offset: const Offset(0, 8),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
+                      // Back Button (Material Symbols / Arrow Back, >=48dp touch target)
+                      Semantics(
+                        label: 'Back',
+                        button: true,
+                        child: SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: IconButton(
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              size: 24,
+                              color: AppColors.text,
+                            ),
+                            onPressed: () {
+                              if (context.canPop()) {
+                                context.pop();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Title: "Good to see you." (Heading 32/38 Roboto Medium #292E28)
+                      Text(
+                        'Good to see you.',
+                        style: AppTextStyles.heading,
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Subtitle: "Log in and pick up\nwhere you left off." (Body 16/22 Roboto Regular #62675D)
+                      Text(
+                        'Log in and pick up\nwhere you left off.',
+                        style: AppTextStyles.body16,
+                      ),
+                      const SizedBox(height: 32),
+
+                      // General server error banner if network/server issue
+                      if (_generalError != null) ...[
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: AppColors.errorContainer,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            _generalError!,
+                            style: AppTextStyles.error,
+                          ),
                         ),
                       ],
-                    ),
-                    child: const Icon(
-                      Icons.hourglass_bottom_rounded,
-                      size: 40,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Welcome to Day-Balance',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.h1,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Budget your daily time, focus on what matters',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.bodyMedium,
-                  ),
-                  const SizedBox(height: 36),
 
-                  // Error Message Banner
-                  if (authState.errorMessage != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.error.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.error_outline_rounded,
-                            color: AppColors.error,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              authState.errorMessage!,
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.error,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // Email field
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    autocorrect: false,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      hintText: 'student@example.com',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                    ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return 'Email is required';
-                      }
-                      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                      if (!emailRegex.hasMatch(val.trim())) {
-                        return 'Enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Password field
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
+                      // Email Field (Floating label "Email", radius 4)
+                      AppTextField(
+                        controller: _emailController,
+                        focusNode: _emailFocusNode,
+                        label: 'Email',
+                        hintText: 'maya.chen@university.edu',
+                        errorText: _emailError,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        isEnabled: !isLoading,
+                        onChanged: (_) => _clearErrors(),
+                        onSubmitted: (_) {
+                          _passwordFocusNode.requestFocus();
                         },
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      filled: true,
-                      fillColor: AppColors.surface,
-                    ),
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return 'Password is required';
-                      }
-                      if (val.length < 8) {
-                        return 'Password must be at least 8 characters';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
-                  // Login Button
-                  ElevatedButton(
-                    onPressed: authState.isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.textOnPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                      // Password Field (Floating label "Password", show/hide toggle, radius 4)
+                      AppPasswordField(
+                        controller: _passwordController,
+                        focusNode: _passwordFocusNode,
+                        label: 'Password',
+                        errorText: _passwordError,
+                        textInputAction: TextInputAction.done,
+                        isEnabled: !isLoading,
+                        onChanged: (_) => _clearErrors(),
+                        onSubmitted: (_) => _handleLogin(),
                       ),
-                      elevation: 2,
-                    ),
-                    child: authState.isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                      const SizedBox(height: 12),
+
+                      // "Forgot password?" Link (Right-aligned, Roboto Semibold 14, #49664D)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: isLoading ? null : _handleForgotPassword,
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.primarySage,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 12,
+                            ),
+                            minimumSize: const Size(48, 48),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                        )
-                      : const Text(
-                          'Log In',
-                          style: AppTextStyles.button,
-                        ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Register link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Don't have an account?",
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                      TextButton(
-                        onPressed: () => context.go('/register'),
-                        child: Text(
-                          'Sign Up',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
+                          child: Text(
+                            'Forgot password?',
+                            style: AppTextStyles.link,
                           ),
                         ),
                       ),
+                      const SizedBox(height: 24),
+
+                      // Primary Button: "Log in" (Height 48dp, Pill radius 100, #49664D)
+                      AppPrimaryButton(
+                        text: 'Log in',
+                        isLoading: isLoading,
+                        isEnabled: !isLoading,
+                        onPressed: _handleLogin,
+                      ),
+
+                      // Flexible spacer to push bottom CTA down on larger displays
+                      const Spacer(),
+                      const SizedBox(height: 32),
+
+                      // "New to Day-Balance?" Prompt (Roboto Regular 14, #62675D)
+                      Text(
+                        'New to Day-Balance?',
+                        style: AppTextStyles.body14.copyWith(
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Secondary Button: "Create an account" (Height 48dp, Pill radius 100, outlined)
+                      AppSecondaryButton(
+                        text: 'Create an account',
+                        isEnabled: !isLoading,
+                        onPressed: () {
+                          context.go('/register');
+                        },
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

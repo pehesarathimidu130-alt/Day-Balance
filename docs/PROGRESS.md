@@ -24,7 +24,7 @@
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Auth Module](backend/auth.md) | DRAFT | Register, login, logout, refresh, delete account | Endpoints written and compile, not tested end-to-end against live DB |
+| [Auth Module](backend/auth.md) | DONE | Register, login, logout, refresh, delete account | Verified live with real backend HTTP requests and Neon DB |
 | [Users Module](backend/users.md) | DRAFT | Profile, onboarding fields | Endpoints written and compile, not tested end-to-end |
 | [Categories Module](backend/categories.md) | DRAFT | List categories, user selection | Endpoints written and compile, not tested end-to-end |
 | [Plans Module](backend/plans.md) | DRAFT | Daily plans, plan items CRUD | Endpoints written and compile, not tested end-to-end |
@@ -34,7 +34,7 @@
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Login Screen](screens/login.md) | DRAFT | Email + password login | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
+| [Login Screen](screens/login.md) | DONE | Email + password login strictly matching Figma 03_login.png | Verified with widget tests and live backend auth flow |
 | [Register Screen](screens/register.md) | DRAFT | Email + password registration | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
 | [Onboarding Schedule](screens/onboarding_schedule.md) | DRAFT | Wake time, bedtime picker | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
 | [Onboarding Routine](screens/onboarding_routine.md) | DRAFT | Routine minutes, waking hours calc | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
@@ -48,8 +48,12 @@
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Dio Client](components/dio_client.md) | DRAFT | HTTP client with JWT interceptor | Token refresh flow written, not tested live against running API |
+| [Dio Client](components/dio_client.md) | DONE | HTTP client with JWT interceptor | Token refresh flow verified with real backend requests |
 | [App Router](components/app_router.md) | DRAFT | GoRouter with routes | Compiles and passes smoke test, routes point to temporary/placeholder screens |
-| [Theme System](components/theme_system.md) | DRAFT | AppColors, AppTextStyles, AppTheme | Tokens defined, to be aligned with Figma design tokens |
+| [Theme System](components/theme_system.md) | DONE | AppColors, AppTextStyles, AppTheme | Extracted from Figma Style Guide |
+| [Primary Button](components/primary_button.md) | DONE | 48dp pill primary CTA button | Built to Figma specs with loading state |
+| [Secondary Button](components/secondary_button.md) | DONE | 48dp pill outlined CTA button | Built to Figma specs |
+| [App Text Field](components/app_text_field.md) | DONE | Outlined text field with floating label | 4dp radius, 56dp height, error styling |
+| [App Password Field](components/app_password_field.md) | DONE | Password field with show/hide toggle | Accessible 48dp toggle target, error styling |
 | [Category Constants](components/category_constants.md) | DONE | 7 fixed categories with colors and icons | Matches project specification categories |
 | [Notification Service](components/notification_service.md) | DRAFT | Local notification helper for timer overtime | Not wired into the app yet |

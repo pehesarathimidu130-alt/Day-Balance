@@ -7,7 +7,7 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: DayBalanceApp()));
     await tester.pumpAndSettle();
 
-    // Verify login screen renders welcome message
-    expect(find.text('Welcome to Day-Balance'), findsOneWidget);
+    // Verify login screen renders heading matching Figma
+    expect(find.text('Good to see you.'), findsOneWidget);
   });
 }

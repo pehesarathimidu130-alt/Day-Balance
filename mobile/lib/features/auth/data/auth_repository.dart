@@ -69,8 +69,21 @@ class AuthRepository {
 
       return UserModel.fromJson(userJson);
     } on DioException catch (e) {
-      final message =
-          e.response?.data?['error'] ?? e.message ?? 'Login failed';
+      String message;
+      if (e.response != null &&
+          e.response?.data is Map &&
+          e.response?.data['error'] != null) {
+        message = e.response!.data['error'].toString();
+      } else if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        message = 'Unable to connect. Please check your connection and try again.';
+      } else if (e.response?.statusCode == 429) {
+        message = 'Too many attempts. Please try again in a few minutes.';
+      } else {
+        message = 'Something went wrong. Please try again.';
+      }
       throw Exception(message);
     }
   }

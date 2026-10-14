@@ -50,7 +50,12 @@ class AuthInterceptor extends Interceptor {
       final refreshToken = await _storage.read(key: _refreshTokenKey);
       if (refreshToken != null) {
         try {
-          final response = await _dio.post(
+          final refreshDio = Dio(BaseOptions(
+            baseUrl: _dio.options.baseUrl,
+            connectTimeout: _dio.options.connectTimeout,
+            receiveTimeout: _dio.options.receiveTimeout,
+          ));
+          final response = await refreshDio.post(
             '/api/auth/refresh',
             data: {'refreshToken': refreshToken},
           );

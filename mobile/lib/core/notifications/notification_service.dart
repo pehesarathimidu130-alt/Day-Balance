@@ -23,7 +23,7 @@ class NotificationService {
     );
 
     try {
-      await _notificationsPlugin.initialize(initSettings);
+      await _notificationsPlugin.initialize(settings: initSettings);
       _initialized = true;
     } catch (_) {
       // In test environments or unsupported platforms, continue gracefully
@@ -58,10 +58,10 @@ class NotificationService {
 
     try {
       await _notificationsPlugin.show(
-        categoryName.hashCode,
-        'Time is up for $categoryName!',
-        'You have used your budgeted time for this category and entered overtime.',
-        details,
+        id: categoryName.hashCode,
+        title: 'Time is up for $categoryName!',
+        body: 'You have used your budgeted time for this category and entered overtime.',
+        notificationDetails: details,
       );
     } catch (_) {
       // Gracefully handle if notifications disabled by user
