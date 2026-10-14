@@ -1,14 +1,15 @@
 # Onboarding: Routine Screen
-Status: PLANNED
-Location: `/mobile/lib/features/onboarding/presentation/`
+Status: DRAFT
+Location: `/mobile/lib/features/onboarding/presentation/onboarding_routine_screen.dart`
 
-## Plan
-- [ ] Create screen with routine minutes input (wind-up, shower, etc.)
-- [ ] Show final calculation: waking hours = (bedtime - wake) - routine minutes
-- [ ] Display "You have X hours per day" message
-- [ ] "Next" button saves and navigates to `/onboarding/categories`
-- [ ] Match Figma design
+> **NOTE**: TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs.
+
+## Draft Implementation
+- Stepper buttons (+/- 15 min increments) with minute counter
+- Preset quick chips (30m, 45m, 60m, 90m, 120m)
+- Breakdown card: Gross Waking Time - Routine Deductions = Net Hours to Budget
+- Calls `onboardingControllerProvider.notifier.saveRoutine()` (patches `/api/users/me`)
+- Navigates to `/onboarding/categories`
 
 ## Notes for the next developer
-- routine_minutes is a single integer value (total routine time, not broken down)
-- This is step 2 of 3 in onboarding
+- Rebuild UI strictly according to Figma design (`/figma/05_onboarding_routine.png`) when instructed.

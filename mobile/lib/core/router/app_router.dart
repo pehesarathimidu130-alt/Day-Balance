@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
+import '../../features/onboarding/presentation/onboarding_schedule_screen.dart';
+import '../../features/onboarding/presentation/onboarding_routine_screen.dart';
+import '../../features/onboarding/presentation/onboarding_categories_screen.dart';
+import '../../features/planning/presentation/plan_screen.dart';
 
 // Placeholder screens — each will be replaced with real implementations
 class _PlaceholderScreen extends StatelessWidget {
@@ -28,34 +34,29 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/login',
       name: 'login',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Login'),
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: '/register',
       name: 'register',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Register'),
+      builder: (context, state) => const RegisterScreen(),
     ),
 
     // Onboarding
     GoRoute(
       path: '/onboarding/schedule',
       name: 'onboarding-schedule',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Set Your Schedule'),
+      builder: (context, state) => const OnboardingScheduleScreen(),
     ),
     GoRoute(
       path: '/onboarding/routine',
       name: 'onboarding-routine',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Daily Routine'),
+      builder: (context, state) => const OnboardingRoutineScreen(),
     ),
     GoRoute(
       path: '/onboarding/categories',
       name: 'onboarding-categories',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Choose Categories'),
+      builder: (context, state) => const OnboardingCategoriesScreen(),
     ),
 
     // Main app
@@ -68,8 +69,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/plan',
       name: 'plan',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Plan Your Day'),
+      builder: (context, state) => const PlanScreen(),
     ),
     GoRoute(
       path: '/summary',

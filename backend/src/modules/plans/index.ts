@@ -1,3 +1,4 @@
-// Plans module: create/update daily plan, get today's plan, plan items
-// TODO: Implement routes and controllers
-export {};
+export * from './plans.router';
+export * from './plans.controller';
+export * from './plans.service';
+export * from './plans.validation';

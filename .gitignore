@@ -59,3 +59,5 @@ npm-debug.log*
 # NEVER ignore docs or design
 # /docs
 # /design
+.neon
+node_modules/

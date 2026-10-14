@@ -1,16 +1,22 @@
 # Categories Module
-Status: PLANNED
+Status: DRAFT
 Location: `/backend/src/modules/categories/`
 
-## Plan
-- [ ] Create `categories.router.ts` with routes:
-  - GET `/api/categories` — list all 7 categories (public, no auth required)
-  - GET `/api/categories/mine` — list user's selected categories (auth required)
-  - PUT `/api/categories/mine` — replace user's selected categories (auth required, body: { categoryIds: string[] })
-- [ ] Create `categories.controller.ts` with handler functions
-- [ ] Create `categories.service.ts` with business logic
-- [ ] Create `categories.validation.ts` with zod schemas
-- [ ] Wire up the categories router in `app.ts`
+## Done
+- Created `categories.validation.ts`:
+  - `updateUserCategoriesSchema`: validates non-empty array of category IDs
+- Created `categories.service.ts`:
+  - `getAllCategories`: returns all 7 categories sorted by `sortOrder`
+  - `getUserCategories`: returns the user's selected categories by joining `user_categories` with `categories`
+  - `setUserCategories`: validates category IDs against system categories, replaces `user_categories` rows for the user, and returns fresh selection
+- Created `categories.controller.ts`:
+  - `getAll`: handles `GET /api/categories` (public)
+  - `getMine`: handles `GET /api/categories/mine` (authenticated)
+  - `setMine`: handles `PUT /api/categories/mine` (authenticated)
+- Created `categories.router.ts`:
+  - Public route for `GET /`
+  - Authenticated routes for `GET /mine` and `PUT /mine`
+- Mounted `/api/categories` in `app.ts`
 
 ## Notes for the next developer
 - Categories table is read-only to clients — seeded by `db:seed` script

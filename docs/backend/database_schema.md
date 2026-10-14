@@ -12,13 +12,13 @@ Location: `/backend/src/db/schema.ts`, `/backend/src/db/connection.ts`, `/backen
   - **daily_plans**: id (uuid PK), user_id (FK), plan_date (date), waking_seconds (int), created_at. Unique(user_id, plan_date)
   - **plan_items**: id (uuid PK), daily_plan_id (FK, cascade), user_id (FK), category_id (FK), planned_seconds, remaining_seconds, started_at (nullable). Unique(daily_plan_id, category_id). Partial unique index on (user_id) WHERE started_at IS NOT NULL
   - **time_entries**: id (uuid PK), plan_item_id (FK, cascade), user_id (FK), started_at, ended_at (nullable)
-- Created `src/db/connection.ts` — Neon serverless driver + Drizzle ORM connection
-- Created `src/db/seed.ts` — Seeds the 7 categories with onConflictDoNothing
-- Created `drizzle.config.ts` — Drizzle Kit config for generating and running migrations
+- Created `src/db/connection.ts` — Neon serverless driver (`@neondatabase/serverless`) + Drizzle ORM connection (`drizzle-orm/neon-http`)
+- Applied schema directly to live Neon PostgreSQL using `npm run db:push`
+- Executed `npm run db:seed` and verified all 7 categories seeded successfully
+- Created `drizzle.config.ts` — Drizzle Kit config configured to use unpooled Neon connection (`DATABASE_URL_UNPOOLED`)
 
 ## Notes for the next developer
-- The migration file has NOT been generated yet — user needs to run `npm run db:generate` after setting DATABASE_URL
 - The partial unique index on plan_items ensures only one timer runs per user at a time (database-level enforcement)
 - user_categories uses a uniqueIndex instead of a composite primary key because Drizzle's pgTable API handles this more cleanly
 - The seed script is idempotent (onConflictDoNothing)
-- Connection uses `@neondatabase/serverless` (HTTP driver), not `pg` TCP driver — this works with Neon's serverless model
+- Connection uses `@neondatabase/serverless` (HTTP driver) via connection pooling (`DATABASE_URL`)

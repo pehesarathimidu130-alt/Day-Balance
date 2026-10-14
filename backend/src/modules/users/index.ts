@@ -1,3 +1,4 @@
-// Users module: get profile, update profile (onboarding fields)
-// TODO: Implement routes and controllers
-export {};
+export * from './users.router';
+export * from './users.controller';
+export * from './users.service';
+export * from './users.validation';

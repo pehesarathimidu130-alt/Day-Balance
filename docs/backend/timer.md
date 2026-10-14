@@ -1,21 +1,25 @@
 # Timer Module
-Status: PLANNED
+Status: DRAFT
 Location: `/backend/src/modules/timer/`
 
-## Plan
-- [ ] Create `timer.router.ts` with routes:
-  - POST `/api/timer/start` — start timer for a category (body: { planItemId })
-  - POST `/api/timer/pause` — pause the currently running timer
-  - GET `/api/timer/status` — get current timer state for today
-- [ ] Create `timer.controller.ts` with handler functions
-- [ ] Create `timer.service.ts` with business logic (see Timer Rule below)
-- [ ] Create `timer.validation.ts` with zod schemas
-- [ ] All routes require `authenticate` middleware
-- [ ] Wire up the timer router in `app.ts`
+## Done
+- Created `timer.validation.ts`:
+  - `startTimerSchema`: validates `planItemId` UUID
+  - `timerStatusQuerySchema`: validates optional `date` string (YYYY-MM-DD)
+- Created `timer.service.ts`:
+  - `pauseTimer`: finds any active timer for user (`started_at IS NOT NULL`), computes elapsed seconds since started_at, decrements `remaining_seconds` (retaining negative values for overtime), sets `started_at = null`, and updates open `time_entries` record with `ended_at = now()`
+  - `startTimer`: verifies user owns the plan item, pauses any other active timer first (enforcing the database constraint), sets `started_at = now()`, creates a new `time_entries` row, and returns active item with server timestamp
+  - `getStatus`: retrieves today's plan, all plan items with category metadata, identifies currently active item, and returns current server timestamp for drift calculation
+- Created `timer.controller.ts`:
+  - `start`: handles `POST /api/timer/start`
+  - `pause`: handles `POST /api/timer/pause`
+  - `getStatus`: handles `GET /api/timer/status`
+- Created `timer.router.ts`:
+  - All routes protected by `authenticate` middleware
+- Mounted `/api/timer` in `app.ts`
 
-## Timer Rule (CRITICAL — do not implement differently)
-
-**Never decrement a counter every second.** The correct approach:
+## Timer Rule (CRITICAL — followed strictly)
+Never decrement a counter every second.
 
 ### Data model
 - `plan_items.remaining_seconds` — the last-known remaining time (updated on pause)
@@ -31,7 +35,7 @@ else:
 The Flutter app refreshes this computed value every second for the UI. The server never does per-second updates.
 
 ### Starting a timer
-1. Check the partial unique index: if another plan_item has `started_at IS NOT NULL` for this user, pause it first (see Pausing)
+1. Check running item: pause any existing running item first
 2. Set `plan_items.started_at = now()` on the target item
 3. Create a `time_entries` row with `started_at = now()`, `ended_at = NULL`
 
@@ -46,14 +50,8 @@ The Flutter app refreshes this computed value every second for the UI. The serve
 - Display: show the absolute value in red, counting up
 - Fire a local notification when remaining hits 0
 
-### Why this works
-- Survives app backgrounding, app kill, phone restart
-- Server only stores timestamps — no polling, no WebSocket, no cron
-- Client computes the displayed value from server data
-- Partial unique index guarantees at most one running timer per user at the database level
-
 ## Notes for the next developer
-- The partial unique index `plan_items_one_running_timer` is already in the Drizzle schema
+- The partial unique index `plan_items_one_running_timer` is enforced in the Drizzle schema
 - Time entries create an audit trail of all timer sessions
 - The client should call GET `/api/timer/status` on app resume to get fresh server state
 - All time calculations use server timestamps, never client clock

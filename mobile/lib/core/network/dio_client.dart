@@ -44,17 +44,39 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
-      // TODO: Attempt token refresh using the refresh token.
-      // 1. Read refresh token from secure storage.
-      // 2. Call POST /api/auth/refresh with the refresh token.
-      // 3. On success: save new tokens, retry original request.
-      // 4. On failure: clear tokens and redirect to login.
+    if (err.response?.statusCode == 401 &&
+        err.requestOptions.path != '/api/auth/refresh' &&
+        err.requestOptions.path != '/api/auth/login') {
       final refreshToken = await _storage.read(key: _refreshTokenKey);
       if (refreshToken != null) {
-        // Placeholder: refresh logic will be implemented with auth module
-        handler.next(err);
-        return;
+        try {
+          final refreshDio = Dio(BaseOptions(
+            baseUrl: _dio.options.baseUrl,
+            connectTimeout: _dio.options.connectTimeout,
+            receiveTimeout: _dio.options.receiveTimeout,
+          ));
+          final response = await refreshDio.post(
+            '/api/auth/refresh',
+            data: {'refreshToken': refreshToken},
+          );
+          final data = response.data['data'] as Map<String, dynamic>;
+          final tokens = data['tokens'] as Map<String, dynamic>;
+          final newAccessToken = tokens['accessToken'] as String;
+          final newRefreshToken = tokens['refreshToken'] as String;
+
+          await saveTokens(
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+          );
+
+          final options = err.requestOptions;
+          options.headers['Authorization'] = 'Bearer $newAccessToken';
+          final responseRetry = await _dio.fetch(options);
+          handler.resolve(responseRetry);
+          return;
+        } catch (_) {
+          await clearTokens();
+        }
       }
     }
     handler.next(err);

@@ -1,3 +1,4 @@
-// Categories module: list categories, select/deselect user categories
-// TODO: Implement routes and controllers
-export {};
+export * from './categories.router';
+export * from './categories.controller';
+export * from './categories.service';
+export * from './categories.validation';
