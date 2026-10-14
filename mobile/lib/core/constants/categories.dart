@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_icons.dart';
 
 /// The 7 fixed Day-Balance categories, matching the backend seed data.
 class Category {
@@ -24,57 +25,57 @@ const List<Category> kCategories = [
   Category(
     id: 'academic',
     name: 'Academic',
-    description: 'Assignments, projects, tutorials, lab sheets, studying',
+    description: 'assignments, projects, tutorials, lab sheets',
     color: AppColors.academic,
-    icon: Icons.school,
+    icon: AppIcons.categoryAcademic,
     sortOrder: 1,
   ),
   Category(
     id: 'life_family',
     name: 'Life/Family',
-    description: 'Chores, errands, family time, commuting',
+    description: 'chores, errands, family time',
     color: AppColors.lifeFamily,
-    icon: Icons.family_restroom,
+    icon: AppIcons.categoryLifeFamily,
     sortOrder: 2,
   ),
   Category(
     id: 'entertainment',
     name: 'Entertainment',
-    description: 'YouTube, games, social media, movies',
+    description: 'videos, games, social media',
     color: AppColors.entertainment,
-    icon: Icons.sports_esports,
+    icon: AppIcons.categoryEntertainment,
     sortOrder: 3,
   ),
   Category(
     id: 'personal_reading',
     name: 'Personal/Reading',
-    description: 'Reading, hobbies, learning for fun, exercise',
+    description: 'reading, hobbies, exercise',
     color: AppColors.personalReading,
-    icon: Icons.menu_book,
+    icon: AppIcons.categoryPersonalReading,
     sortOrder: 4,
   ),
   Category(
     id: 'career',
     name: 'Career',
-    description: 'Freelancing, portfolio, job applications, side projects',
+    description: 'freelancing, portfolio, job applications',
     color: AppColors.career,
-    icon: Icons.work,
+    icon: AppIcons.categoryCareer,
     sortOrder: 5,
   ),
   Category(
     id: 'unplanned',
     name: 'Unplanned/Extra capacity',
-    description: 'Buffer for surprises and overruns',
+    description: 'buffer for surprises',
     color: AppColors.unplanned,
-    icon: Icons.schedule,
+    icon: AppIcons.categoryUnplanned,
     sortOrder: 6,
   ),
   Category(
     id: 'rest',
     name: 'Rest/Recovery',
-    description: 'Naps, breaks, screen-free relaxing',
+    description: 'naps, breaks, screen-free relaxing',
     color: AppColors.rest,
-    icon: Icons.self_improvement,
+    icon: AppIcons.categoryRest,
     sortOrder: 7,
   ),
 ];

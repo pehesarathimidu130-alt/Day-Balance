@@ -127,8 +127,10 @@ class AppTextStyles {
   static const TextStyle h1 = heading;
   static const TextStyle h2 = title;
   static const TextStyle h3 = title;
+  static const TextStyle headlineSmall = title;
   static const TextStyle bodyLarge = body16;
   static const TextStyle bodyMedium = body14;
   static const TextStyle bodySmall = caption12;
   static const TextStyle label = caption12;
+  static const TextStyle labelSmall = caption12;
 }
