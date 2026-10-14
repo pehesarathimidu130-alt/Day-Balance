@@ -16,23 +16,23 @@
 
 | Doc | Status | Summary |
 |-----|--------|---------|
-| [Auth Module](backend/auth.md) | PLANNED | Register, login, logout, refresh, delete account |
-| [Users Module](backend/users.md) | PLANNED | Profile, onboarding fields |
-| [Categories Module](backend/categories.md) | PLANNED | List categories, user selection |
-| [Plans Module](backend/plans.md) | PLANNED | Daily plans, plan items CRUD |
-| [Timer Module](backend/timer.md) | PLANNED | Start/pause/resume, time entries, timer math |
+| [Auth Module](backend/auth.md) | DONE | Register, login, logout, refresh, delete account |
+| [Users Module](backend/users.md) | DONE | Profile, onboarding fields |
+| [Categories Module](backend/categories.md) | DONE | List categories, user selection |
+| [Plans Module](backend/plans.md) | DONE | Daily plans, plan items CRUD |
+| [Timer Module](backend/timer.md) | DONE | Start/pause/resume, time entries, timer math |
 
 ## Mobile Screens
 
 | Doc | Status | Summary |
 |-----|--------|---------|
-| [Login Screen](screens/login.md) | PLANNED | Email + password login |
-| [Register Screen](screens/register.md) | PLANNED | Email + password registration |
-| [Onboarding Schedule](screens/onboarding_schedule.md) | PLANNED | Wake time, bedtime picker |
-| [Onboarding Routine](screens/onboarding_routine.md) | PLANNED | Routine minutes, waking hours calc |
-| [Onboarding Categories](screens/onboarding_categories.md) | PLANNED | Select categories from the 7 |
-| [Today Screen](screens/today.md) | PLANNED | Main screen with timers, planned/remaining |
-| [Plan Screen](screens/plan.md) | PLANNED | Daily planning with hour steppers |
+| [Login Screen](screens/login.md) | DONE | Email + password login |
+| [Register Screen](screens/register.md) | DONE | Email + password registration |
+| [Onboarding Schedule](screens/onboarding_schedule.md) | DONE | Wake time, bedtime picker |
+| [Onboarding Routine](screens/onboarding_routine.md) | DONE | Routine minutes, waking hours calc |
+| [Onboarding Categories](screens/onboarding_categories.md) | DONE | Select categories from the 7 |
+| [Today Screen](screens/today.md) | IN PROGRESS | Main screen with timers, planned/remaining |
+| [Plan Screen](screens/plan.md) | DONE | Daily planning with hour steppers |
 | [Summary Screen](screens/summary.md) | PLANNED | End-of-day planned vs actual |
 | [Settings Screen](screens/settings.md) | PLANNED | User preferences, logout, delete account |
 

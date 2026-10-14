@@ -1,5 +1,5 @@
 # Today Screen
-Status: PLANNED
+Status: IN PROGRESS
 Location: `/mobile/lib/features/timer/presentation/`
 
 ## Plan

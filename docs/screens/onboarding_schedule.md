@@ -1,13 +1,17 @@
 # Onboarding: Schedule Screen
-Status: PLANNED
-Location: `/mobile/lib/features/onboarding/presentation/`
+Status: DONE
+Location: `/mobile/lib/features/onboarding/presentation/onboarding_schedule_screen.dart`
 
-## Plan
-- [ ] Create screen with wake time and bedtime pickers (time pickers)
-- [ ] Show calculated waking hours as user adjusts times
-- [ ] "Next" button saves to user profile and navigates to `/onboarding/routine`
-- [ ] Match Figma design
+## Done
+- Created `OnboardingScheduleScreen`:
+  - Wake time and bedtime selector cards with custom Material 3 `showTimePicker`
+  - Dynamic calculation of gross waking hours (correctly handles overnight spans where bedtime is past midnight)
+  - Gradient calculation summary card
+  - Calls `onboardingControllerProvider.notifier.saveSchedule()` (patches `/api/users/me`)
+  - Navigates to `/onboarding/routine`
+- Wired into `appRouter`
+- Verified via `flutter analyze` and `flutter test`
 
 ## Notes for the next developer
-- waking hours = (bedtime - wake_time), accounting for overnight spans
-- This is step 1 of 3 in onboarding
+- Gross waking hours = (bedtime - wake_time), modulo 24h
+- Step 1 of 3 in onboarding flow

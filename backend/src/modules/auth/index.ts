@@ -1,3 +1,4 @@
-// Auth module: register, login, logout, refresh token, delete account
-// TODO: Implement routes and controllers
-export {};
+export * from './auth.router';
+export * from './auth.controller';
+export * from './auth.service';
+export * from './auth.validation';

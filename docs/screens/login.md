@@ -1,16 +1,22 @@
 # Login Screen
-Status: PLANNED
-Location: `/mobile/lib/features/auth/presentation/`
+Status: DONE
+Location: `/mobile/lib/features/auth/presentation/login_screen.dart`
 
-## Plan
-- [ ] Create login screen widget with email and password fields
-- [ ] Add form validation (email format, password min length)
-- [ ] Add "Log in" button that calls POST `/api/auth/login`
-- [ ] Store tokens on success via `AuthInterceptor.saveTokens()`
-- [ ] Navigate to `/home` (or `/onboarding/schedule` if not onboarded)
-- [ ] Add link to register screen
-- [ ] Match Figma design from `/design/screens/`
+## Done
+- Created `LoginScreen` (`ConsumerStatefulWidget`):
+  - Form validation for email format and min-length password
+  - Password visibility toggle
+  - Error banner showing clear backend/network errors
+  - Loading spinner indicator on primary action button
+  - Calls `authControllerProvider.notifier.login(email, password)`
+  - Saves JWT tokens via `AuthInterceptor.saveTokens()`
+  - Routes to `/home` if `onboardingDone == true`, or `/onboarding/schedule` if onboarding is pending
+  - Quick navigation link to `/register`
+- Connected with `AuthRepository`, `dioProvider`, and Riverpod `AuthController`
+- Implemented real token refresh in `dio_client.dart` using `POST /api/auth/refresh`
+- Wired route into `appRouter`
+- Verified via `flutter test` smoke test
 
 ## Notes for the next developer
-- Design file: check `/design/screens/` for the login screen PNG
-- Use `AppColors` and `AppTextStyles` — never hardcode
+- Uses `AppColors` and `AppTextStyles` tokens
+- Form keys and controllers are safely disposed
