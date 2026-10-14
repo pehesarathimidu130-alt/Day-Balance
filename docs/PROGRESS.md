@@ -18,13 +18,13 @@
 | [Backend Setup](setup/backend_setup.md) | DONE | Express + TS + Drizzle project, health endpoint, DB connection | Verified live: Express server running, Neon DB & Object Storage connected |
 | [Mobile Setup](setup/mobile_setup.md) | DONE | Flutter project, dependencies, folder structure, theme, router | Verified with `flutter analyze` and `flutter test` smoke test |
 | [Database Schema](backend/database_schema.md) | DONE | Drizzle schema with all tables, seed script | Verified live: schema pushed to Neon PostgreSQL and 7 categories seeded |
-| [Environment Config](setup/environment_config.md) | DONE | .env.example, zod validation, required variables | Verified live: Neon DB and S3 Object Storage environment variables loaded and tested |
+| [Environment Config](setup/environment_config.md) | DONE | .env.example, zod validation, required variables | Verified live: Neon DB, S3 Object Storage, and TEST_USER_PASSWORD environment variables loaded |
 
 ## Backend Modules
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Auth Module](backend/auth.md) | DONE | Register, login, logout, refresh, delete account | Verified live with real backend HTTP requests and Neon DB |
+| [Auth Module](backend/auth.md) | DONE | Register, login, logout, refresh, delete account | Verified live with real backend HTTP requests and Neon DB; create-test-user script added |
 | [Users Module](backend/users.md) | DRAFT | Profile, onboarding fields | Endpoints written and compile, not tested end-to-end |
 | [Categories Module](backend/categories.md) | DRAFT | List categories, user selection | Endpoints written and compile, not tested end-to-end |
 | [Plans Module](backend/plans.md) | DRAFT | Daily plans, plan items CRUD | Endpoints written and compile, not tested end-to-end |
@@ -48,7 +48,7 @@
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Dio Client](components/dio_client.md) | DONE | HTTP client with JWT interceptor | Token refresh flow verified with real backend requests |
+| [Dio Client](components/dio_client.md) | DONE | HTTP client with JWT interceptor | Multi-platform baseUrl via String.fromEnvironment('API_BASE_URL'), token refresh verified |
 | [App Router](components/app_router.md) | DRAFT | GoRouter with routes | Compiles and passes smoke test, routes point to temporary/placeholder screens |
 | [Theme System](components/theme_system.md) | DONE | AppColors, AppTextStyles, AppTheme | Extracted from Figma Style Guide |
 | [Primary Button](components/primary_button.md) | DONE | 48dp pill primary CTA button | Built to Figma specs with loading state |
