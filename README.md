@@ -9,7 +9,12 @@ day-balance/
 ├── mobile/          Flutter app (Android-first, iOS later)
 ├── backend/         Node.js + Express + TypeScript REST API
 ├── docs/            Handoff documentation for AI continuity
-├── design/          Figma screen exports + design tokens
+├── design/          Figma exports (PNG & Dart), assets, tokens & links
+│   ├── exports/     CodeTea Flutter dart exports & PNG screen previews
+│   ├── assets/      Icons, illustrations & logos
+│   ├── DESIGN_TOKENS.md
+│   └── FIGMA_LINKS.md
+├── .agents/         Agent rules and custom skills
 └── AGENTS.md        AI continuation protocol
 ```
 
@@ -23,7 +28,7 @@ day-balance/
 | HTTP | dio (with JWT interceptor) |
 | Token Storage | flutter_secure_storage |
 | Notifications | flutter_local_notifications + timezone |
-| Backend | Node.js, Express 5, TypeScript (strict) |
+| Backend | Node.js 22, Express 5, TypeScript (strict) |
 | Database | PostgreSQL on Neon |
 | ORM | Drizzle ORM + drizzle-kit |
 | Validation | zod |
@@ -34,7 +39,7 @@ day-balance/
 
 ### Prerequisites
 - Flutter SDK 3.29.0 (stable)
-- Node.js 18+
+- Node.js 22+
 - A [Neon](https://neon.tech) PostgreSQL database
 - Android Studio / emulator (or physical device)
 
@@ -45,10 +50,19 @@ cd backend
 cp .env.example .env
 # Edit .env: set DATABASE_URL, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET
 npm install
-npm run db:generate   # generate SQL migration files
+npm run db:generate   # generate SQL migration files with drizzle-kit
 npm run db:migrate    # apply migrations to your Neon database
 npm run db:seed       # seed the 7 categories
 npm run dev           # start dev server on port 3000
+```
+
+Database management commands:
+```bash
+npm run db:generate   # generate migrations from src/db/schema.ts
+npm run db:migrate    # run pending migrations against Neon DB
+npm run db:push       # push schema changes directly to Neon DB (prototyping)
+npm run db:studio     # launch Drizzle Studio database viewer locally
+npm run db:seed       # populate the 7 standard categories
 ```
 
 ### Mobile Setup
@@ -93,7 +107,9 @@ Copy `backend/.env.example` to `backend/.env` and fill in:
 | `JWT_REFRESH_SECRET` | Random secret for signing refresh tokens |
 | `PORT` | Server port (default: 3000) |
 | `NODE_ENV` | `development` or `production` |
-| `CORS_ORIGIN` | Allowed origins (default: `*`) |
+| `CORS_ORIGIN` | Allowed origins (default: `*`; must be restricted before launch) |
+
+> **Security Note**: `CORS_ORIGIN` is configured to allow all origins (`*`) during development. Before launching to production, `CORS_ORIGIN` must be restricted to trusted client domains/origins.
 
 ## Project Structure
 

@@ -12,4 +12,4 @@ Location: `/mobile/lib/features/onboarding/presentation/onboarding_schedule_scre
 - Navigates to `/onboarding/routine`
 
 ## Notes for the next developer
-- Rebuild UI strictly according to Figma design (`/figma/04_onboarding_schedule.png`) when instructed.
+- Rebuild UI strictly according to Figma design (`design/exports/png/04_onboarding_schedule.png` and `design/exports/dart/_04_onboarding_schedule.dart`) when instructed.

@@ -35,9 +35,7 @@ Desktop.ini
 .idea/
 *.ipr
 *.iws
-.vscode/*
-!.vscode/settings.json
-!.vscode/launch.json
+.vscode/
 *.suo
 *.ntvs*
 *.njsproj

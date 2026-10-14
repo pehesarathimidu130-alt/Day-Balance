@@ -19,4 +19,4 @@ Location: `/mobile/lib/features/planning/presentation/plan_screen.dart`
 - Wired route `/plan` into `appRouter`
 
 ## Notes for the next developer
-- Rebuild UI strictly according to Figma designs (`/figma/08_daily_planning.png`, `/figma/08_daily_planning_over_allocated.png`, `/figma/08_daily_planning_zero_hours_left.png`) when instructed.
+- Rebuild UI strictly according to Figma designs (`design/exports/png/08_daily_planning.png`, `design/exports/png/08_daily_planning_over_allocated.png`, `design/exports/png/08_daily_planning_zero_hours_left.png`) and `.dart` exports when instructed.

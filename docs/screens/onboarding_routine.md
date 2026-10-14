@@ -12,4 +12,4 @@ Location: `/mobile/lib/features/onboarding/presentation/onboarding_routine_scree
 - Navigates to `/onboarding/categories`
 
 ## Notes for the next developer
-- Rebuild UI strictly according to Figma design (`/figma/05_onboarding_routine.png`) when instructed.
+- Rebuild UI strictly according to Figma design (`design/exports/png/05_onboarding_routine.png` and `design/exports/dart/_05_onboarding_routine.dart`) when instructed.

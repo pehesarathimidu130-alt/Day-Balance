@@ -17,7 +17,7 @@ When asked to build or rebuild a screen in Day-Balance, execute these steps in e
 
 ## Step 1: Design Source Inspection (Strict Order)
 Before building or changing ANY screen, in this order:
-1. **Find row in `figma/FIGMA_LINKS.md`**: Identify the corresponding PNG file, `.dart` export, and Figma frame link.
+1. **Find row in `design/FIGMA_LINKS.md`**: Identify the corresponding PNG file, `.dart` export, and Figma frame link.
 2. **Look at the PNG**: Inspect visual aesthetics, alignment, and components.
 3. **Read the `.dart` export fully**: Examine exact measurements, margins, padding, colors, font sizes, text strings, and layout tree.
 4. **Read live Figma frame through Figma MCP**:
@@ -37,8 +37,8 @@ Before building or changing ANY screen, in this order:
   - Shared widgets: `mobile/lib/shared/widgets/` (`AppPrimaryButton`, `AppSecondaryButton`, `AppTextField`, `AppPasswordField`, etc.).
   - Responsive layout: `Column`, `Row`, `Expanded`, `Padding`, `SafeArea`, `SingleChildScrollView`, `ConstrainedBox`.
   - NEVER paste exported CodeTea code into `lib/` unchanged.
-  - NEVER import from `/figma`.
-  - NEVER edit files in `/figma`.
+  - NEVER import from `/design`.
+  - NEVER edit files in `/design`.
 
 ## Step 4: Verification & Comparison
 - Run `flutter analyze` in `mobile/`: 0 errors/issues required.

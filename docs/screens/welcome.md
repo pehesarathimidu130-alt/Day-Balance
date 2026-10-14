@@ -4,7 +4,7 @@ Location: `/mobile/lib/features/auth/presentation/welcome_screen.dart`
 
 ## Done
 
-- **Implementation from Figma Flutter Export (`figma/_01_welcome.dart` & `figma/01_welcome.png`)**:
+- **Implementation from Figma Flutter Export (`design/exports/dart/_01_welcome.dart` & `design/exports/png/01_welcome.png`)**:
   - Rebuilt the welcome landing screen using theme tokens and shared widgets.
   - Implemented `DayBalanceLogo` (`mobile/lib/shared/widgets/day_balance_logo.dart`) using Canvas vector drawing for the rising sun brand mark.
   - Header with `DayBalanceLogo` and "Day-Balance" title (22sp medium/bold, `#292E28`).
