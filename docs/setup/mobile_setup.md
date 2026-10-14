@@ -5,7 +5,7 @@ Location: `/mobile/`
 ## Done
 
 - Created Flutter project with `flutter create --org com.daybalance --project-name day_balance mobile`
-- Flutter 3.47.4 (stable), Dart 3.13.3
+- Flutter 3.29.0 (stable), Dart 3.7.0
 - Android applicationId: `com.daybalance.day_balance`
 - Added dependencies: flutter_riverpod, go_router, dio, flutter_secure_storage, flutter_local_notifications, timezone, intl
 - analysis_options.yaml includes `package:flutter_lints/flutter.yaml` with strict rules

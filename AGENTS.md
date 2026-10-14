@@ -2,10 +2,16 @@
 
 A daily time-budgeting mobile app (Flutter + Node.js + PostgreSQL).
 
-**Read `/docs/PROGRESS.md` first.** Continue any IN PROGRESS item. Follow the doc template. Update docs as you work.
+**Read `/docs/PROGRESS.md` first.** Report which items are IN PROGRESS and wait for the user to confirm before continuing. Never start PLANNED or PAUSED items unless the user's current message asks for them. Build ONLY what the user's current message requests; if more seems needed, ask. Follow the doc template. Update docs as you work.
+
+## Status Definitions
+- **PLANNED**: Not started.
+- **DRAFT**: Code written and compiles, but NOT run or tested end-to-end.
+- **DONE**: Verified by actually running it (e.g. a real API call or emulator test).
+- **PAUSED**: Deliberately stopped, waiting on something (design, decision).
 
 ## Stack
-- **Mobile** (`/mobile`): Flutter 3.47+, Dart, Material 3, flutter_riverpod, go_router, dio
+- **Mobile** (`/mobile`): Flutter 3.29.0, Dart 3.7.0, Material 3, flutter_riverpod, go_router, dio
 - **Backend** (`/backend`): Node.js, Express, TypeScript (strict), Drizzle ORM, PostgreSQL on Neon, JWT auth
 - **Docs** (`/docs`): Handoff documentation for AI continuity
 - **Design** (`/design`): Figma exports (PNGs + design tokens)

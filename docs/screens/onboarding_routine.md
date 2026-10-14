@@ -1,17 +1,15 @@
 # Onboarding: Routine Screen
-Status: DONE
+Status: DRAFT
 Location: `/mobile/lib/features/onboarding/presentation/onboarding_routine_screen.dart`
 
-## Done
-- Created `OnboardingRoutineScreen`:
-  - Stepper buttons (+/- 15 min increments) with tabular minute counter
-  - Preset quick chips (30m, 45m, 60m, 90m, 120m)
-  - Detailed breakdown card: Gross Waking Time - Routine Deductions = Net Hours to Budget
-  - Calls `onboardingControllerProvider.notifier.saveRoutine()` (patches `/api/users/me`)
-  - Navigates to `/onboarding/categories`
-- Wired into `appRouter`
-- Verified via `flutter analyze` and `flutter test`
+> **NOTE**: TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs.
+
+## Draft Implementation
+- Stepper buttons (+/- 15 min increments) with minute counter
+- Preset quick chips (30m, 45m, 60m, 90m, 120m)
+- Breakdown card: Gross Waking Time - Routine Deductions = Net Hours to Budget
+- Calls `onboardingControllerProvider.notifier.saveRoutine()` (patches `/api/users/me`)
+- Navigates to `/onboarding/categories`
 
 ## Notes for the next developer
-- routineMinutes is stored as total minutes in DB
-- Step 2 of 3 in onboarding flow
+- Rebuild UI strictly according to Figma design (`/figma/05_onboarding_routine.png`) when instructed.

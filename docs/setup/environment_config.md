@@ -1,5 +1,5 @@
 # Environment Config
-Status: DONE
+Status: DRAFT
 Location: `/backend/.env.example`, `/backend/src/config/env.ts`
 
 ## Done

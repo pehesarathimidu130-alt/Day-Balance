@@ -1,5 +1,5 @@
 # Database Schema
-Status: DONE
+Status: DRAFT
 Location: `/backend/src/db/schema.ts`, `/backend/src/db/connection.ts`, `/backend/src/db/seed.ts`, `/backend/drizzle.config.ts`
 
 ## Done

@@ -1,5 +1,5 @@
 # Categories Module
-Status: DONE
+Status: DRAFT
 Location: `/backend/src/modules/categories/`
 
 ## Done

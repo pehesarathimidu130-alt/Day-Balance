@@ -1,5 +1,5 @@
 # Auth Module
-Status: DONE
+Status: DRAFT
 Location: `/backend/src/modules/auth/`
 
 ## Done

@@ -1,19 +1,16 @@
 # Onboarding: Categories Screen
-Status: DONE
+Status: DRAFT
 Location: `/mobile/lib/features/onboarding/presentation/onboarding_categories_screen.dart`
 
-## Done
-- Created `OnboardingCategoriesScreen`:
-  - Renders all 7 fixed categories from `kCategories` with icons, descriptions, and designated category colors
-  - Interactive multi-select toggles
-  - Ensures at least one category remains selected
-  - Calls `onboardingControllerProvider.notifier.completeOnboarding()`:
-    - PUT `/api/categories/mine` with selected IDs
-    - PATCH `/api/users/me` with `onboardingDone: true`
-  - Navigates to `/home` on completion
-- Wired into `appRouter`
-- Verified via `flutter analyze` and `flutter test`
+> **NOTE**: TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs.
+
+## Draft Implementation
+- Renders all 7 fixed categories from `kCategories` with icons, descriptions, and category colors
+- Interactive multi-select toggles
+- Calls `onboardingControllerProvider.notifier.completeOnboarding()`:
+  - PUT `/api/categories/mine` with selected IDs
+  - PATCH `/api/users/me` with `onboardingDone: true`
+- Navigates to `/home` on completion
 
 ## Notes for the next developer
-- Category IDs correspond to the backend seeded categories
-- Step 3 of 3 in onboarding flow
+- Rebuild UI strictly according to Figma design (`/figma/07_choose_categories.png`) when instructed.

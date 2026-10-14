@@ -17,7 +17,7 @@ day-balance/
 
 | Layer | Technology |
 |-------|-----------|
-| Mobile | Flutter 3.47+, Dart 3.13+, Material 3 |
+| Mobile | Flutter 3.29.0, Dart 3.7.0, Material 3 |
 | State | flutter_riverpod |
 | Navigation | go_router |
 | HTTP | dio (with JWT interceptor) |
@@ -33,7 +33,7 @@ day-balance/
 ## Getting Started
 
 ### Prerequisites
-- Flutter SDK 3.47+ (stable)
+- Flutter SDK 3.29.0 (stable)
 - Node.js 18+
 - A [Neon](https://neon.tech) PostgreSQL database
 - Android Studio / emulator (or physical device)

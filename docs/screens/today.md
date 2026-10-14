@@ -1,6 +1,8 @@
 # Today Screen
-Status: IN PROGRESS
+Status: PAUSED
 Location: `/mobile/lib/features/timer/presentation/`
+
+> **PAUSED**: Blocked on Figma design; do not continue.
 
 ## Plan
 - [ ] Show total hours left at top
@@ -10,9 +12,10 @@ Location: `/mobile/lib/features/timer/presentation/`
 - [ ] Overtime: when remaining hits 0, show count-up in red + fire local notification
 - [ ] "Edit plan" button navigates to `/plan`
 - [ ] Refresh timer state on app resume (call GET `/api/timer/status`)
-- [ ] Match Figma design
+- [ ] Match Figma design from `/figma/`
 
 ## Notes for the next developer
 - Timer display is client-side computed, refreshed every second via a periodic timer
 - See `/docs/backend/timer.md` for the complete timer rule
 - This is the main screen of the app
+- DO NOT resume or implement until user provides instructions with Figma designs
