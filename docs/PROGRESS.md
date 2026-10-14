@@ -15,10 +15,10 @@
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Backend Setup](setup/backend_setup.md) | DRAFT | Express + TS + Drizzle project, health endpoint, DB connection | Server code written and compiles, not yet run against live Neon DB |
+| [Backend Setup](setup/backend_setup.md) | DONE | Express + TS + Drizzle project, health endpoint, DB connection | Verified live: Express server running, Neon DB & Object Storage connected |
 | [Mobile Setup](setup/mobile_setup.md) | DONE | Flutter project, dependencies, folder structure, theme, router | Verified with `flutter analyze` and `flutter test` smoke test |
-| [Database Schema](backend/database_schema.md) | DRAFT | Drizzle schema with all tables, seed script | Schema written and compiles, migrations not yet applied to live DB |
-| [Environment Config](setup/environment_config.md) | DRAFT | .env.example, zod validation, required variables | Zod schema configured, real `.env` secrets not yet tested live |
+| [Database Schema](backend/database_schema.md) | DONE | Drizzle schema with all tables, seed script | Verified live: schema pushed to Neon PostgreSQL and 7 categories seeded |
+| [Environment Config](setup/environment_config.md) | DONE | .env.example, zod validation, required variables | Verified live: Neon DB and S3 Object Storage environment variables loaded and tested |
 
 ## Backend Modules
 
