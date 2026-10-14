@@ -1,9 +1,14 @@
-# Figma Flutter Exports Rule
+# Figma Workflow Rule
 
-Before building or changing ANY screen:
-1. Find the `.dart` export for that screen in `/figma` and read it fully, plus the matching PNG.
-2. Use the `.dart` file as the exact source for sizes, spacing, colors, font sizes, text content, icons and widget structure.
-3. Rebuild the screen cleanly using our theme tokens (`mobile/lib/core/theme`) and shared widgets (`mobile/lib/shared/widgets`). Do NOT paste the exported code into `lib/` unchanged, do NOT import files from `/figma`, and do NOT edit files in `/figma`.
-4. Replace fixed positions and fixed widths with responsive layout (`Column`, `Row`, `Expanded`, `Padding`, `SafeArea`, `SingleChildScrollView`) so the screen works on small and large phones and with the keyboard open.
-5. If the `.dart` file and the PNG disagree, tell the user.
-6. If a screen has no `.dart` file, tell the user and ask before using the PNG.
+Before building or changing ANY screen, in this order:
+1. Find its row in `figma/FIGMA_LINKS.md`.
+2. Look at the PNG.
+3. Read the `.dart` export fully.
+4. Read the live Figma frame through the Figma MCP using the link in that row (read only that frame, not the whole file).
+5. Only then plan and build.
+
+Use the data as the exact source for sizes, spacing, colors, fonts, text, icons and structure, but rebuild the screen cleanly using our theme tokens (`mobile/lib/core/theme`) and shared widgets (`mobile/lib/shared/widgets`), and make it responsive. Never paste exported code unchanged, never import from `/figma`, never edit `/figma`.
+
+If the sources disagree, do not guess: prefer live Figma values, use the PNG to check the look, and list every disagreement in the report. If any source is missing or the Figma MCP does not work, tell me and ask before continuing.
+
+After building, run the screen and compare it with the PNG, and list any differences.
