@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:day_balance/features/onboarding/presentation/onboarding_categories_screen.dart';
 
 void main() {
@@ -39,5 +40,40 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('7 categories selected'), findsOneWidget);
+  });
+
+  testWidgets('Plan my day button navigates to /onboarding/setting-up without saving directly',
+      (tester) async {
+    final router = GoRouter(
+      initialLocation: '/onboarding/categories',
+      routes: [
+        GoRoute(
+          path: '/onboarding/categories',
+          builder: (context, state) => const OnboardingCategoriesScreen(),
+        ),
+        GoRoute(
+          path: '/onboarding/setting-up',
+          builder: (context, state) => const Scaffold(body: Text('Setting Up Screen')),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp.router(
+          routerConfig: router,
+        ),
+      ),
+    );
+
+    expect(find.text('Plan my day'), findsOneWidget);
+
+    // Scroll Plan my day button into view and tap
+    await tester.ensureVisible(find.text('Plan my day'));
+    await tester.tap(find.text('Plan my day'));
+    await tester.pumpAndSettle();
+
+    // Verify it navigates to /onboarding/setting-up
+    expect(find.text('Setting Up Screen'), findsOneWidget);
   });
 }

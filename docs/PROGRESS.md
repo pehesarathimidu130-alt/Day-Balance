@@ -41,6 +41,7 @@
 | [Onboarding Routine](screens/onboarding_routine.md) | DONE | Morning & wind-up routine steppers matching Figma `_05_onboarding_routine.dart` | Verified with widget tests, routine math, and live API |
 | [Onboarding Result](screens/onboarding_result.md) | DONE | Daily net hours calculation & breakdown matching Figma `_06_onboarding_result.dart` | Verified with widget tests and router transitions |
 | [Onboarding Categories](screens/onboarding_categories.md) | DONE | Select categories from the 7 matching Figma `_07_choose_categories.dart` | Verified with widget tests and live API |
+| [Setting Up Screen](screens/setup_loading.md) | DONE | "Setting up your day" loading screen with custom sky animation, honest social proof, and error retry | Built from spec; verified live and with widget tests |
 | [Today Screen](screens/today.md) | PAUSED | Main screen with timers, planned/remaining | Blocked on Figma design; do not continue |
 | [Plan Screen](screens/plan.md) | DRAFT | Daily planning with hour steppers | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
 | [Summary Screen](screens/summary.md) | PLANNED | End-of-day planned vs actual | Not started |
@@ -71,6 +72,6 @@
 
 ---
 
-## Next Steps for Tomorrow
-- Rebuild Daily Planning screen (`08_plan_your_day.png`, `_08_plan_your_day.dart`) from Figma designs.
-- Rebuild Remaining screens (`09_today_empty`, `10_today_planned`, `11_timer_running`, `12_timer_overtime`, `13_summary_day_close`, etc.) following the Figma workflow.
+## Next Steps
+- Verify the core API (`feature/core-api-verify`).
+- Build Daily Planning (08) and Today (09).
