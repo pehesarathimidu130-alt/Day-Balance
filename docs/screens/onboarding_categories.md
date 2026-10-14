@@ -1,16 +1,14 @@
 # Onboarding: Categories Screen
-Status: DRAFT
+Status: DONE
 Location: `/mobile/lib/features/onboarding/presentation/onboarding_categories_screen.dart`
 
-> **NOTE**: TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs.
-
-## Draft Implementation
-- Renders all 7 fixed categories from `kCategories` with icons, descriptions, and category colors
-- Interactive multi-select toggles
-- Calls `onboardingControllerProvider.notifier.completeOnboarding()`:
-  - PUT `/api/categories/mine` with selected IDs
-  - PATCH `/api/users/me` with `onboardingDone: true`
-- Navigates to `/home` on completion
-
-## Notes for the next developer
-- Rebuild UI strictly according to Figma design (`design/exports/png/07_choose_categories.png` and `design/exports/dart/_07_choose_categories.dart`) when instructed.
+## Done
+- [x] Rebuilt layout cleanly from Figma `_07_choose_categories.dart` and `07_choose_categories.png`
+- [x] Top bar with `AppBackButton` and title "Your categories" (22sp)
+- [x] Heading block: "What fills your day?" (32sp) and "Keep what fits. You can change these later." (14sp)
+- [x] Rendered 7 `CategoryTile`s (all selected by default, full opacity when selected, minimum 1 required)
+- [x] Selected categories counter text: "X categories selected" (12sp)
+- [x] Settings reminder caption: "You can add or remove categories anytime in Settings once you finish setup."
+- [x] Primary button "Plan my day" with loading indicator, calling `controller.completeOnboarding()`
+- [x] Navigates cleanly to `/home` on successful onboarding completion
+- [x] Widget tests in `mobile/test/onboarding_categories_screen_test.dart`
