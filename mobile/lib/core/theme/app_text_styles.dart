@@ -6,8 +6,10 @@ import 'app_colors.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  static const String _fontFamily = 'Roboto';
-  static const String _monoFontFamily = 'RobotoMono';
+  static const String fontFamily = 'Roboto';
+  static const String monoFontFamily = 'RobotoMono';
+  static const String _fontFamily = fontFamily;
+  static const String _monoFontFamily = monoFontFamily;
 
   // Display 40/44 (Roboto Medium)
   static const TextStyle display = TextStyle(
@@ -127,8 +129,10 @@ class AppTextStyles {
   static const TextStyle h1 = heading;
   static const TextStyle h2 = title;
   static const TextStyle h3 = title;
+  static const TextStyle headlineSmall = title;
   static const TextStyle bodyLarge = body16;
   static const TextStyle bodyMedium = body14;
   static const TextStyle bodySmall = caption12;
   static const TextStyle label = caption12;
+  static const TextStyle labelSmall = caption12;
 }

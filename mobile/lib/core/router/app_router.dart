@@ -5,10 +5,13 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/onboarding/presentation/onboarding_schedule_screen.dart';
 import '../../features/onboarding/presentation/onboarding_routine_screen.dart';
+import '../../features/onboarding/presentation/onboarding_result_screen.dart';
 import '../../features/onboarding/presentation/onboarding_categories_screen.dart';
+import '../../features/onboarding/presentation/setting_up_screen.dart';
 import '../../features/planning/presentation/plan_screen.dart';
+import 'app_transitions.dart';
 
-// Placeholder screens — each will be replaced with real implementations
+// Placeholder screens — will be replaced with real implementations
 class _PlaceholderScreen extends StatelessWidget {
   final String title;
   const _PlaceholderScreen({required this.title});
@@ -27,67 +30,110 @@ class _PlaceholderScreen extends StatelessWidget {
   }
 }
 
-/// App router configuration using go_router.
+/// App router configuration using go_router with smooth CustomTransitionPage transitions.
 final GoRouter appRouter = GoRouter(
   initialLocation: '/welcome',
   routes: [
-    // Auth & Welcome
+    // Auth & Welcome (SharedAxis)
     GoRoute(
       path: '/welcome',
       name: 'welcome',
-      builder: (context, state) => const WelcomeScreen(),
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const WelcomeScreen(),
+      ),
     ),
     GoRoute(
       path: '/login',
       name: 'login',
-      builder: (context, state) => const LoginScreen(),
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const LoginScreen(),
+      ),
     ),
     GoRoute(
       path: '/register',
       name: 'register',
-      builder: (context, state) => const RegisterScreen(),
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const RegisterScreen(),
+      ),
     ),
 
-    // Onboarding
+    // Onboarding (FadeThrough from Auth into Step 1, then SharedAxis between steps)
     GoRoute(
       path: '/onboarding/schedule',
       name: 'onboarding-schedule',
-      builder: (context, state) => const OnboardingScheduleScreen(),
+      pageBuilder: (context, state) => AppTransitions.fadeThrough(
+        state: state,
+        child: const OnboardingScheduleScreen(),
+      ),
     ),
     GoRoute(
       path: '/onboarding/routine',
       name: 'onboarding-routine',
-      builder: (context, state) => const OnboardingRoutineScreen(),
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const OnboardingRoutineScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/onboarding/result',
+      name: 'onboarding-result',
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const OnboardingResultScreen(),
+      ),
     ),
     GoRoute(
       path: '/onboarding/categories',
       name: 'onboarding-categories',
-      builder: (context, state) => const OnboardingCategoriesScreen(),
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const OnboardingCategoriesScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/onboarding/setting-up',
+      name: 'onboarding-setting-up',
+      pageBuilder: (context, state) => AppTransitions.fadeThrough(
+        state: state,
+        child: const SettingUpScreen(),
+      ),
     ),
 
-    // Main app
+    // Main app (FadeThrough into /home, SharedAxis for subpages)
     GoRoute(
       path: '/home',
       name: 'home',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Today'),
+      pageBuilder: (context, state) => AppTransitions.fadeThrough(
+        state: state,
+        child: const _PlaceholderScreen(title: 'Today'),
+      ),
     ),
     GoRoute(
       path: '/plan',
       name: 'plan',
-      builder: (context, state) => const PlanScreen(),
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const PlanScreen(),
+      ),
     ),
     GoRoute(
       path: '/summary',
       name: 'summary',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Day Summary'),
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const _PlaceholderScreen(title: 'Day Summary'),
+      ),
     ),
     GoRoute(
       path: '/settings',
       name: 'settings',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Settings'),
+      pageBuilder: (context, state) => AppTransitions.sharedAxis(
+        state: state,
+        child: const _PlaceholderScreen(title: 'Settings'),
+      ),
     ),
   ],
 );

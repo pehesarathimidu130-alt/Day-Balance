@@ -23,6 +23,7 @@
 | Empty / Error States (Loading) | `design/exports/png/16_empty_error_states_loading.png` | `design/exports/dart/_16_empty_error_states_loading.dart` | https://www.figma.com/design/hEpqC6LfjEHogSWvzYCgkz/Untitled?node-id=7-6744&t=NuZkh5ScMUsGG9XT-4 |
 | Empty / Error States (No Connection) | `design/exports/png/16_empty_error_states_no_connection.png` | `design/exports/dart/_16_empty_error_states_no_connection.dart` | https://www.figma.com/design/hEpqC6LfjEHogSWvzYCgkz/Untitled?node-id=7-6661&t=NuZkh5ScMUsGG9XT-4 |
 | Empty / Error States (Session Expired) | `design/exports/png/16_empty_error_states_session_expired.png` | `design/exports/dart/_16_empty_error_states_session_expired.dart` | https://www.figma.com/design/hEpqC6LfjEHogSWvzYCgkz/Untitled?node-id=7-6710&t=NuZkh5ScMUsGG9XT-4 |
+| 17 Setting up loading | None (built from spec) | None (built from spec) | None (no Figma design, built from spec) |
 | Style Guide | `design/exports/png/Day-Balance_style_guide.png` | `design/exports/dart/DayBalance_style_guide.dart` | https://www.figma.com/design/hEpqC6LfjEHogSWvzYCgkz/Untitled?node-id=7-6805&t=NuZkh5ScMUsGG9XT-4 |
 
 ---

@@ -79,7 +79,7 @@ export class AuthService {
       .values({
         email,
         passwordHash,
-        displayName: displayName || null,
+        displayName: displayName?.trim() || 'Hello!',
         routineMinutes: 0,
         onboardingDone: false,
       })
@@ -93,6 +93,8 @@ export class AuthService {
         onboardingDone: users.onboardingDone,
         createdAt: users.createdAt,
       });
+
+    newUser.displayName = newUser.displayName || 'Hello!';
 
     const tokens = this.generateTokens(newUser.id);
     await this.storeRefreshToken(newUser.id, tokens.refreshToken);
@@ -129,7 +131,7 @@ export class AuthService {
     const userProfile: UserProfile = {
       id: user.id,
       email: user.email,
-      displayName: user.displayName,
+      displayName: user.displayName || 'Hello!',
       wakeTime: user.wakeTime,
       bedtime: user.bedtime,
       routineMinutes: user.routineMinutes,

@@ -6,7 +6,8 @@ import '../data/onboarding_repository.dart';
 class OnboardingState {
   final TimeOfDay wakeTime;
   final TimeOfDay bedtime;
-  final int routineMinutes;
+  final int morningRoutineMinutes;
+  final int windUpRoutineMinutes;
   final Set<String> selectedCategories;
   final bool isLoading;
   final String? errorMessage;
@@ -14,17 +15,23 @@ class OnboardingState {
   const OnboardingState({
     this.wakeTime = const TimeOfDay(hour: 7, minute: 0),
     this.bedtime = const TimeOfDay(hour: 23, minute: 0),
-    this.routineMinutes = 60,
+    this.morningRoutineMinutes = 45,
+    this.windUpRoutineMinutes = 45,
     this.selectedCategories = const {
       'academic',
       'life_family',
       'entertainment',
       'personal_reading',
+      'career',
+      'unplanned',
       'rest',
     },
     this.isLoading = false,
     this.errorMessage,
   });
+
+  /// Total minutes of morning + wind-up routines
+  int get routineMinutes => morningRoutineMinutes + windUpRoutineMinutes;
 
   /// Total minutes awake between wake time and bedtime
   int get grossWakingMinutes {
@@ -36,36 +43,70 @@ class OnboardingState {
     return bedTotal - wakeTotal;
   }
 
+  /// Sleep minutes in 24h
+  int get sleepMinutes => (24 * 60) - grossWakingMinutes;
+
   /// Net minutes available after deducting fixed daily routines
   int get netAvailableMinutes {
     return max(0, grossWakingMinutes - routineMinutes);
   }
 
+  /// Formatted gross waking hours e.g. "16h 00m"
   String get grossHoursFormatted {
     final h = grossWakingMinutes ~/ 60;
     final m = grossWakingMinutes % 60;
-    return m == 0 ? '${h}h' : '${h}h ${m}m';
+    return '${h}h ${m.toString().padLeft(2, '0')}m';
   }
 
+  /// Formatted net hours to plan e.g. "14h 30m"
   String get netHoursFormatted {
     final h = netAvailableMinutes ~/ 60;
     final m = netAvailableMinutes % 60;
-    return m == 0 ? '${h}h' : '${h}h ${m}m';
+    return '${h}h ${m.toString().padLeft(2, '0')}m';
+  }
+
+  /// Subtitle string e.g. "7 AM — 11 PM awake · 8 hours of sleep"
+  String get awakeRangeFormatted {
+    String formatT(TimeOfDay t) {
+      final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+      final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+      return t.minute == 0
+          ? '$h $period'
+          : '$h:${t.minute.toString().padLeft(2, '0')} $period';
+    }
+
+    final sleepH = sleepMinutes ~/ 60;
+    final sleepM = sleepMinutes % 60;
+    final sleepStr =
+        sleepM == 0 ? '$sleepH hours of sleep' : '$sleepH h $sleepM m of sleep';
+    return '${formatT(wakeTime)} — ${formatT(bedtime)} awake · $sleepStr';
   }
 
   OnboardingState copyWith({
     TimeOfDay? wakeTime,
     TimeOfDay? bedtime,
+    int? morningRoutineMinutes,
+    int? windUpRoutineMinutes,
     int? routineMinutes,
     Set<String>? selectedCategories,
     bool? isLoading,
     String? errorMessage,
     bool clearError = false,
   }) {
+    int finalMorning = morningRoutineMinutes ?? this.morningRoutineMinutes;
+    int finalWindUp = windUpRoutineMinutes ?? this.windUpRoutineMinutes;
+    if (routineMinutes != null &&
+        morningRoutineMinutes == null &&
+        windUpRoutineMinutes == null) {
+      finalMorning = routineMinutes ~/ 2;
+      finalWindUp = routineMinutes - finalMorning;
+    }
+
     return OnboardingState(
       wakeTime: wakeTime ?? this.wakeTime,
       bedtime: bedtime ?? this.bedtime,
-      routineMinutes: routineMinutes ?? this.routineMinutes,
+      morningRoutineMinutes: finalMorning,
+      windUpRoutineMinutes: finalWindUp,
       selectedCategories: selectedCategories ?? this.selectedCategories,
       isLoading: isLoading ?? this.isLoading,
       errorMessage:
@@ -84,6 +125,18 @@ class OnboardingController extends Notifier<OnboardingState> {
 
   void setBedtime(TimeOfDay time) {
     state = state.copyWith(bedtime: time);
+  }
+
+  void setMorningRoutineMinutes(int minutes) {
+    final maxAllowed = max(0, state.grossWakingMinutes - state.windUpRoutineMinutes);
+    final clamped = minutes.clamp(0, maxAllowed);
+    state = state.copyWith(morningRoutineMinutes: clamped);
+  }
+
+  void setWindUpRoutineMinutes(int minutes) {
+    final maxAllowed = max(0, state.grossWakingMinutes - state.morningRoutineMinutes);
+    final clamped = minutes.clamp(0, maxAllowed);
+    state = state.copyWith(windUpRoutineMinutes: clamped);
   }
 
   void setRoutineMinutes(int minutes) {
@@ -147,6 +200,28 @@ class OnboardingController extends Notifier<OnboardingState> {
       final repo = ref.read(onboardingRepositoryProvider);
       await repo.updateUserCategories(state.selectedCategories.toList());
       await repo.updateProfile(onboardingDone: true);
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      state = state.copyWith(isLoading: false, errorMessage: msg);
+      return false;
+    }
+  }
+
+  /// Full save of all onboarding preferences:
+  /// wake time, bedtime, routine minutes, categories, and onboardingDone = true.
+  Future<bool> completeFullOnboarding() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final repo = ref.read(onboardingRepositoryProvider);
+      await repo.updateUserCategories(state.selectedCategories.toList());
+      await repo.updateProfile(
+        wakeTime: _formatTimeOfDay(state.wakeTime),
+        bedtime: _formatTimeOfDay(state.bedtime),
+        routineMinutes: state.routineMinutes,
+        onboardingDone: true,
+      );
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {

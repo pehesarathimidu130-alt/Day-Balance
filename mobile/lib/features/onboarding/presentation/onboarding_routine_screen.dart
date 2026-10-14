@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_icons.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/widgets/app_back_button.dart';
+import '../../../shared/widgets/pill_stepper.dart';
+import '../../../shared/widgets/primary_button.dart';
+import '../../../shared/widgets/step_progress_bar.dart';
 import 'onboarding_controller.dart';
 
 class OnboardingRoutineScreen extends ConsumerWidget {
@@ -13,241 +18,243 @@ class OnboardingRoutineScreen extends ConsumerWidget {
     final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
 
-    const presetMinutes = [30, 45, 60, 90, 120];
+    // Format info card calculation string
+    final grossHours = state.grossWakingMinutes ~/ 60;
+    final rHours = state.routineMinutes ~/ 60;
+    final rMins = state.routineMinutes % 60;
+    final rStr = rHours > 0 && rMins > 0
+        ? '${rHours}h ${rMins}m'
+        : rHours > 0
+            ? '${rHours}h'
+            : '${rMins}m';
+    final topCardText = '${grossHours}h awake − $rStr of routines';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Step 2 of 3', style: AppTextStyles.label),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.go('/onboarding/schedule'),
-        ),
-      ),
+      backgroundColor: AppColors.backgroundCream,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 12),
-              const Text(
-                'Fixed Routine Time',
-                style: AppTextStyles.h1,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'How many minutes do you spend on morning prep, meals, showers, and winding down each day?',
-                style: AppTextStyles.bodyMedium,
-              ),
-              const SizedBox(height: 28),
-
-              // Routine Minutes Display and Adjuster
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+        child: Column(
+          children: [
+            // Top App Bar with Back Button
+            Padding(
+              padding: const EdgeInsets.only(left: 12, top: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: AppBackButton(
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/onboarding/schedule');
+                    }
+                  },
                 ),
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const SizedBox(height: 8),
+
+                    // Step 2 of 3 Progress Bar
+                    const StepProgressBar(currentStep: 2),
+                    const SizedBox(height: 32),
+
+                    // Headings
+                    const Text(
+                      'Leave room for the everyday.',
+                      style: AppTextStyles.h1,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Getting ready and winding down count too. Set this time aside before you plan.',
+                      style: AppTextStyles.body14,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Morning Routine Section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Decrement 15 min
-                        IconButton.filledTonal(
-                          onPressed: state.routineMinutes > 0
-                              ? () => controller.setRoutineMinutes(
-                                    state.routineMinutes - 15,
-                                  )
-                              : null,
-                          icon: const Icon(Icons.remove),
-                        ),
-                        Column(
+                        Row(
                           children: [
-                            Text(
-                              '${state.routineMinutes}',
-                              style: AppTextStyles.timerLarge.copyWith(
-                                color: AppColors.primary,
-                                fontSize: 42,
+                            const Icon(
+                              AppIcons.morningRoutine,
+                              size: 24,
+                              color: AppColors.text,
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text(
+                                'Morning routine',
+                                style: TextStyle(
+                                  fontFamily: AppTextStyles.fontFamily,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.text,
+                                ),
                               ),
                             ),
-                            const Text(
-                              'minutes / day',
-                              style: AppTextStyles.bodySmall,
+                            PillStepper(
+                              label: '${state.morningRoutineMinutes} min',
+                              canDecrement: state.morningRoutineMinutes >= 15,
+                              canIncrement: state.routineMinutes + 15 <=
+                                  state.grossWakingMinutes,
+                              onDecrement: () {
+                                controller.setMorningRoutineMinutes(
+                                  state.morningRoutineMinutes - 15,
+                                );
+                              },
+                              onIncrement: () {
+                                controller.setMorningRoutineMinutes(
+                                  state.morningRoutineMinutes + 15,
+                                );
+                              },
                             ),
                           ],
                         ),
-                        // Increment 15 min
-                        IconButton.filledTonal(
-                          onPressed: state.routineMinutes < 360
-                              ? () => controller.setRoutineMinutes(
-                                    state.routineMinutes + 15,
-                                  )
-                              : null,
-                          icon: const Icon(Icons.add),
+                        const SizedBox(height: 4),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 36),
+                          child: Text(
+                            'Get ready, eat, ease into the day.',
+                            style: AppTextStyles.body14,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 32),
 
-                    // Preset Quick Chips
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      children: presetMinutes.map((mins) {
-                        final isSelected = state.routineMinutes == mins;
-                        return ChoiceChip(
-                          label: Text('${mins}m'),
-                          selected: isSelected,
-                          selectedColor: AppColors.primary,
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
+                    // Wind-up Routine Section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              AppIcons.windUpRoutine,
+                              size: 24,
+                              color: AppColors.text,
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text(
+                                'Wind-up routine',
+                                style: TextStyle(
+                                  fontFamily: AppTextStyles.fontFamily,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.text,
+                                ),
+                              ),
+                            ),
+                            PillStepper(
+                              label: '${state.windUpRoutineMinutes} min',
+                              canDecrement: state.windUpRoutineMinutes >= 15,
+                              canIncrement: state.routineMinutes + 15 <=
+                                  state.grossWakingMinutes,
+                              onDecrement: () {
+                                controller.setWindUpRoutineMinutes(
+                                  state.windUpRoutineMinutes - 15,
+                                );
+                              },
+                              onIncrement: () {
+                                controller.setWindUpRoutineMinutes(
+                                  state.windUpRoutineMinutes + 15,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 36),
+                          child: Text(
+                            'Unplug and get ready for bed.',
+                            style: AppTextStyles.body14,
                           ),
-                          onSelected: (_) => controller.setRoutineMinutes(mins),
-                        );
-                      }).toList(),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
-              // Calculation Breakdown Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: Column(
-                  children: [
-                    _BreakdownRow(
-                      label: 'Gross Waking Time',
-                      value: state.grossHoursFormatted,
+                    // Breakdown Info Card (Figma: #EEE8DC, radius 16)
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppColors.cardWarm,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 20,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            topCardText,
+                            style: AppTextStyles.body14,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${state.netHoursFormatted} to plan',
+                            style: const TextStyle(
+                              fontFamily: AppTextStyles.fontFamily,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primarySage,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Routines stay protected, outside your plan.',
+                            style: AppTextStyles.caption12,
+                          ),
+                        ],
+                      ),
                     ),
-                    const Divider(height: 20),
-                    _BreakdownRow(
-                      label: 'Routine Deductions',
-                      value: '- ${state.routineMinutes}m',
-                      valueColor: AppColors.warning,
+                    const SizedBox(height: 24),
+
+                    // Caption
+                    const Text(
+                      'Adjust in 15-minute steps.',
+                      style: AppTextStyles.caption12,
                     ),
-                    const Divider(height: 20),
-                    _BreakdownRow(
-                      label: 'Net Hours to Budget',
-                      value: state.netHoursFormatted,
-                      valueColor: AppColors.primary,
-                      isBold: true,
-                    ),
-                  ],
-                ),
-              ),
+                    const SizedBox(height: 16),
 
-              const Spacer(),
+                    if (state.errorMessage != null) ...[
+                      Text(
+                        state.errorMessage!,
+                        style: AppTextStyles.caption12.copyWith(
+                          color: AppColors.errorRed,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
 
-              if (state.errorMessage != null) ...[
-                Text(
-                  state.errorMessage!,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.error,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-              ],
-
-              // Next Button
-              ElevatedButton(
-                onPressed: state.isLoading
-                    ? null
-                    : () async {
+                    // Button: See my daily hours
+                    AppPrimaryButton(
+                      label: 'See my daily hours',
+                      isLoading: state.isLoading,
+                      onPressed: () async {
                         final ok = await controller.saveRoutine();
                         if (ok && context.mounted) {
-                          context.go('/onboarding/categories');
+                          context.go('/onboarding/result');
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 2,
+                    ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
-                child: state.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Text(
-                        'Next: Choose Categories',
-                        style: AppTextStyles.button,
-                      ),
               ),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
-  }
-}
-
-class _BreakdownRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-  final bool isBold;
-
-  const _BreakdownRow({
-    required this.label,
-    required this.value,
-    this.valueColor,
-    this.isBold = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: isBold
-              ? AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600)
-              : AppTextStyles.bodyMedium,
-        ),
-        Text(
-          value,
-          style: isBold
-              ? AppTextStyles.h3.copyWith(color: valueColor)
-              : AppTextStyles.bodyMedium.copyWith(
-                  color: valueColor ?? AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-        ),
-      ],
     );
   }
 }
