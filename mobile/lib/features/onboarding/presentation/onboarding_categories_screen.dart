@@ -110,7 +110,7 @@ class OnboardingCategoriesScreen extends ConsumerWidget {
                       label: 'Plan my day',
                       isEnabled: state.selectedCategories.isNotEmpty,
                       onPressed: () {
-                        context.go('/onboarding/setting-up');
+                        context.go('/plan');
                       },
                     ),
                     const SizedBox(height: 32),

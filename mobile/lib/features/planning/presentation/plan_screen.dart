@@ -309,7 +309,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                               : () async {
                                   final ok = await controller.savePlan();
                                   if (ok && context.mounted) {
-                                    context.go('/home');
+                                    context.go('/onboarding/setting-up');
                                   }
                                 },
                           style: ElevatedButton.styleFrom(

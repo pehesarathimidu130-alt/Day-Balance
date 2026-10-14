@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,15 +12,66 @@ import '../data/onboarding_repository.dart';
 import 'onboarding_controller.dart';
 import 'setting_up_constants.dart';
 
-/// "Setting up your day" loading screen.
+// ─── Phase data ──────────────────────────────────────────────────────────────
+
+class _Phase {
+  final String title;
+  final String subtitle;
+  final int step; // 0-3 matches step indicators
+
+  const _Phase({
+    required this.title,
+    required this.subtitle,
+    required this.step,
+  });
+}
+
+const List<_Phase> _kPhases = [
+  _Phase(
+    title: 'Reading your rhythm...',
+    subtitle: "You're awake about 16 hours a day.",
+    step: 0,
+  ),
+  _Phase(
+    title: 'Folding your hours...',
+    subtitle: 'Organizing focused deep blocks and flexible recovery.',
+    step: 1,
+  ),
+  _Phase(
+    title: 'Teaching the clock to relax...',
+    subtitle: 'Adding grace periods between commitments.',
+    step: 2,
+  ),
+  _Phase(
+    title: 'Making room for the good stuff...',
+    subtitle: 'Carving protected windows for non-work living.',
+    step: 3,
+  ),
+  _Phase(
+    title: 'All set.',
+    subtitle: 'Your Day-Balance canvas is ready.',
+    step: 4, // past last step = all done
+  ),
+];
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
+
+/// Animated "Setting up your day" loading screen.
 ///
-/// Coordinates:
-/// 1. Calm sky cycle animation (Dawn -> Dusk/Night with twinkling stars -> Ready Sun).
-/// 2. Text sequence cross-fading every 1.8 seconds with personal waking hours and honest social proof.
-/// 3. Concurrent backend save of schedule, routines, categories, and onboarding_done.
-/// 4. Minimum display time of ~4.5 seconds before navigating to /plan.
-/// 5. Screen 16 error state on failure with retry and back buttons (preserving choices).
-/// 6. Reduce-motion accessibility mode and system back button blocking (PopScope).
+/// Flow: Plan → SettingUp → Home
+///
+/// Features:
+/// • Diurnal sky gradient animation (dawn → day → sunset → night → dawn loop).
+/// • Sun + moon parabolic arc orbit.
+/// • Twinkling star layer during night phase.
+/// • Rolling dune SVG horizon.
+/// • 4-step sequenced indicator list.
+/// • Progress bar + rotating text/subtitle.
+/// • Concurrent backend save (completeFullOnboarding).
+/// • Delayed "Continue" button: appears after 2 s, grey (disabled) while
+///   save is in progress, then turns primary color when ready.
+/// • Error state (screen 16) with retry + back.
+/// • Reduce-motion accessibility fallback.
 class SettingUpScreen extends ConsumerStatefulWidget {
   const SettingUpScreen({super.key});
 
@@ -29,153 +80,147 @@ class SettingUpScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingUpScreenState extends ConsumerState<SettingUpScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animationController;
-  Timer? _textTimer;
-  Timer? _minDisplayTimer;
+    with TickerProviderStateMixin {
+  // Sky animation: 10-second looping cycle
+  late final AnimationController _skyController;
 
+  // Phase step timer (2 s between phases)
+  Timer? _phaseTimer;
+
+  // State
+  int _phaseIndex = 0;
+  bool _showText = true; // cross-fade flag
   bool _hasError = false;
   String _errorMessage = '';
 
-  int _currentTextIndex = 0;
-  List<String> _textLines = [];
+  // Backend save state
+  bool _saveSuccess = false;
 
-  // Honest stats response
-  bool _showable = false;
-  int? _similarCount;
+  // "Continue" button visibility (appears after 2 s)
+  bool _showContinueButton = false;
+  Timer? _continueButtonTimer;
+
+  // Minimum display guardrail (4.5 s)
+  Completer<void>? _minCompleter;
+  Timer? _minTimer;
 
   @override
   void initState() {
     super.initState();
 
-    _animationController = AnimationController(
+    _skyController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4800),
-    );
-
-    _initTextLines();
+      duration: const Duration(seconds: 10),
+    )..repeat();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _startAnimationAndSave();
-      }
+      if (mounted) _startFlow();
     });
   }
 
-  void _initTextLines() {
-    final state = ref.read(onboardingControllerProvider);
-    _textLines = SettingUpTexts.buildTextSequence(
-      grossWakingMinutes: state.grossWakingMinutes,
-      showable: _showable,
-      similarCount: _similarCount,
-    );
-  }
-
-  void _startAnimationAndSave() {
+  void _startFlow() {
     setState(() {
       _hasError = false;
       _errorMessage = '';
-      _currentTextIndex = 0;
+      _phaseIndex = 0;
+      _saveSuccess = false;
+      _showContinueButton = false;
     });
 
-    _animationController.reset();
-    _animationController.forward();
-
-    _startTextTimer();
-    _performSaveAndFetch();
+    _skyController.repeat();
+    _startPhaseTimer();
+    _scheduleContinueButton();
+    _performSave();
   }
 
-  void _startTextTimer() {
-    _textTimer?.cancel();
-    _textTimer = Timer.periodic(const Duration(milliseconds: 1800), (timer) {
-      if (!mounted) {
-        timer.cancel();
+  void _startPhaseTimer() {
+    _phaseTimer?.cancel();
+    _phaseTimer = Timer.periodic(const Duration(milliseconds: 2000), (t) {
+      if (!mounted || _hasError) {
+        t.cancel();
         return;
       }
-      if (_hasError) {
-        timer.cancel();
-        return;
+      if (_phaseIndex < _kPhases.length - 2) {
+        // cross-fade
+        setState(() => _showText = false);
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (!mounted) return;
+          setState(() {
+            _phaseIndex++;
+            _showText = true;
+          });
+        });
+      } else {
+        t.cancel();
       }
-
-      setState(() {
-        if (_currentTextIndex < _textLines.length - 1) {
-          _currentTextIndex++;
-        }
-      });
     });
   }
 
-  Future<void> _performSaveAndFetch() async {
+  void _scheduleContinueButton() {
+    _continueButtonTimer?.cancel();
+    _continueButtonTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      setState(() => _showContinueButton = true);
+    });
+  }
+
+  Future<void> _performSave() async {
     final controller = ref.read(onboardingControllerProvider.notifier);
     final repo = ref.read(onboardingRepositoryProvider);
-    final state = ref.read(onboardingControllerProvider);
 
-    // Minimum display time timer & completer: ~4.5 seconds
-    _minDisplayTimer?.cancel();
-    final minCompleter = Completer<void>();
-    _minDisplayTimer = Timer(const Duration(milliseconds: 4500), () {
-      if (!minCompleter.isCompleted) {
-        minCompleter.complete();
+    // Minimum display time
+    _minCompleter = Completer<void>();
+    _minTimer?.cancel();
+    _minTimer = Timer(const Duration(milliseconds: 4500), () {
+      if (!(_minCompleter?.isCompleted ?? true)) {
+        _minCompleter!.complete();
       }
     });
 
-    // Fetch similar routines in parallel with <= 1.5s timeout handled by repo
-    final statsFuture = repo.getSimilarRoutines().then((data) {
-      if (!mounted) return;
-      final showable = data['showable'] as bool? ?? false;
-      final count = data['similarCount'] as int?;
+    // Fetch similar routines in parallel (fire-and-forget, non-critical)
+    repo.getSimilarRoutines().then((_) {}).catchError((_) {});
 
-      setState(() {
-        _showable = showable;
-        _similarCount = count;
-        _textLines = SettingUpTexts.buildTextSequence(
-          grossWakingMinutes: state.grossWakingMinutes,
-          showable: _showable,
-          similarCount: _similarCount,
-        );
-      });
-    }).catchError((_) {
-      // Graceful fallback: never throw or break
-    });
-
-    // Execute save
-    final saveSuccess = await controller.completeFullOnboarding();
+    // Execute the main save
+    final ok = await controller.completeFullOnboarding();
 
     if (!mounted) return;
 
-    if (!saveSuccess) {
-      // Save failed: stop animation, text timer, and cancel minDisplayTimer immediately
-      _animationController.stop();
-      _textTimer?.cancel();
-      _minDisplayTimer?.cancel();
-
-      final stateError = ref.read(onboardingControllerProvider).errorMessage;
+    if (!ok) {
+      _phaseTimer?.cancel();
+      _continueButtonTimer?.cancel();
+      _minTimer?.cancel();
+      final errMsg = ref.read(onboardingControllerProvider).errorMessage;
       setState(() {
         _hasError = true;
-        _errorMessage = stateError ?? SettingUpTexts.errorMessage;
+        _errorMessage = errMsg ?? SettingUpTexts.errorMessage;
       });
       return;
     }
 
-    // Save succeeded: now ensure minimum display time and stats have passed
-    await Future.wait([minCompleter.future, statsFuture]);
+    // Save done — update subtitle to use real waking hours (logged for future use)
 
+    // Advance to last text phase
+    await _minCompleter!.future;
     if (!mounted) return;
 
-    // Display the final confirmation text and route to /plan
     setState(() {
-      _currentTextIndex = _textLines.length - 1; // "All set."
+      _saveSuccess = true;
+      _phaseIndex = _kPhases.length - 1; // "All set."
+      _showText = false;
     });
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      setState(() => _showText = true);
+    });
+  }
 
-    // Brief gentle pause on "All set." before transition
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (mounted) {
-      context.go('/plan');
-    }
+  void _onContinue() {
+    if (!_saveSuccess) return;
+    context.go('/home');
   }
 
   void _retry() {
-    _startAnimationAndSave();
+    _startFlow();
   }
 
   void _backToCategories() {
@@ -184,9 +229,10 @@ class _SettingUpScreenState extends ConsumerState<SettingUpScreen>
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _textTimer?.cancel();
-    _minDisplayTimer?.cancel();
+    _skyController.dispose();
+    _phaseTimer?.cancel();
+    _continueButtonTimer?.cancel();
+    _minTimer?.cancel();
     super.dispose();
   }
 
@@ -196,36 +242,35 @@ class _SettingUpScreenState extends ConsumerState<SettingUpScreen>
 
     return PopScope(
       canPop: _hasError,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _hasError) {
-          _backToCategories();
-        }
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _hasError) _backToCategories();
       },
       child: Scaffold(
         backgroundColor: AppColors.canvas,
         body: SafeArea(
           child: Semantics(
-            label: 'Setting up your day',
+            label: 'Setting up your day. Please wait.',
             container: true,
             child: _hasError
                 ? _buildErrorView()
-                : (reduceMotion ? _buildReduceMotionView() : _buildAnimatedView()),
+                : (reduceMotion
+                    ? _buildReduceMotionView()
+                    : _buildAnimatedView()),
           ),
         ),
       ),
     );
   }
 
-  /// Screen 16 style error view: Human message, Try again CTA, Back CTA.
+  // ── Error view ──────────────────────────────────────────────────────────────
+
   Widget _buildErrorView() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Spacer(flex: 1),
-
-          // Error icon in rounded card
+          const Spacer(),
           Container(
             width: 64,
             height: 64,
@@ -240,28 +285,21 @@ class _SettingUpScreenState extends ConsumerState<SettingUpScreen>
             ),
           ),
           const SizedBox(height: 24),
-
-          // Headline
           Text(
             SettingUpTexts.errorTitle,
-            style: AppTextStyles.h1.copyWith(
-              color: AppColors.textPrimary,
-            ),
+            style: AppTextStyles.h1.copyWith(color: AppColors.textPrimary),
           ),
           const SizedBox(height: 12),
-
-          // Human friendly error message
           Text(
-            _errorMessage.isNotEmpty ? _errorMessage : SettingUpTexts.errorMessage,
+            _errorMessage.isNotEmpty
+                ? _errorMessage
+                : SettingUpTexts.errorMessage,
             style: AppTextStyles.body14.copyWith(
               color: AppColors.textSecondary,
               height: 1.45,
             ),
           ),
-
           const Spacer(flex: 2),
-
-          // Action buttons: Try again & Back (choices preserved)
           AppPrimaryButton(
             label: SettingUpTexts.tryAgainButton,
             onPressed: _retry,
@@ -277,329 +315,636 @@ class _SettingUpScreenState extends ConsumerState<SettingUpScreen>
     );
   }
 
-  /// Calm 60fps custom painted sky animation and cross-fading text.
-  Widget _buildAnimatedView() {
-    final currentText = (_currentTextIndex < _textLines.length)
-        ? _textLines[_currentTextIndex]
-        : SettingUpTexts.settingUp;
+  // ── Reduce-motion fallback ──────────────────────────────────────────────────
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Sky scene animation viewport (wrapped in RepaintBoundary for 60fps performance)
-            RepaintBoundary(
-              child: AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  return CustomPaint(
-                    size: const Size(280, 200),
-                    painter: SkyPainter(
-                      animationValue: _animationController.value,
-                    ),
-                  );
-                },
-              ),
+  Widget _buildReduceMotionView() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(strokeWidth: 2.2),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            _phaseIndex < _kPhases.length
+                ? _kPhases[_phaseIndex].title
+                : 'Setting up...',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body16.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
             ),
-            const SizedBox(height: 36),
+          ),
+          const SizedBox(height: 48),
+          if (_showContinueButton) _buildContinueButton(),
+        ],
+      ),
+    );
+  }
 
-            // Cross-fading pacing text (excluded from screen reader spam)
-            SizedBox(
-              height: 48,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-                child: Semantics(
-                  excludeSemantics: true,
-                  key: ValueKey<String>(currentText),
-                  child: Text(
-                    currentText,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.body16.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w500,
+  // ── Main animated view ──────────────────────────────────────────────────────
+
+  Widget _buildAnimatedView() {
+    final phase = _phaseIndex < _kPhases.length
+        ? _kPhases[_phaseIndex]
+        : _kPhases.last;
+    final progress = (_phaseIndex + 1) / _kPhases.length;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Sky Canvas ─────────────────────────────────────────────────────
+          _SkyCanvas(controller: _skyController),
+          const SizedBox(height: 24),
+
+          // ── Text area ──────────────────────────────────────────────────────
+          Center(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 40,
+                  child: AnimatedOpacity(
+                    opacity: _showText ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Text(
+                      phase.title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: AppTextStyles.fontFamily,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        height: 1.4,
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                AnimatedOpacity(
+                  opacity: _showText ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Text(
+                    phase.subtitle,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.body14.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+
+                // ── Progress bar ────────────────────────────────────────────
+                const SizedBox(height: 16),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'PREPARING DAY-CANVAS',
+                            style: TextStyle(
+                              fontFamily: 'JetBrains Mono',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.06,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            '${(progress * 100).round()}%',
+                            style: const TextStyle(
+                              fontFamily: 'JetBrains Mono',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primarySage,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(99),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                          height: 6,
+                          width: 280 * progress,
+                          color: AppColors.primarySage,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ── Step indicators ────────────────────────────────────────────────
+          _StepIndicators(activeStep: phase.step),
+
+          const SizedBox(height: 28),
+
+          // ── Continue button ────────────────────────────────────────────────
+          AnimatedOpacity(
+            opacity: _showContinueButton ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOut,
+            child: _showContinueButton
+                ? _buildContinueButton()
+                : const SizedBox(height: 52),
+          ),
+        ],
       ),
     );
   }
 
-  /// Accessibility fallback for users with "reduce motion" enabled.
-  Widget _buildReduceMotionView() {
-    final currentText = (_currentTextIndex < _textLines.length)
-        ? _textLines[_currentTextIndex]
-        : SettingUpTexts.settingUp;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Static ready sun viewport
-            CustomPaint(
-              size: const Size(280, 200),
-              painter: StaticSkyPainter(),
+  Widget _buildContinueButton() {
+    final canContinue = _saveSuccess;
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        child: ElevatedButton(
+          onPressed: canContinue ? _onContinue : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                canContinue ? AppColors.primarySage : AppColors.textSecondary.withValues(alpha: 0.25),
+            foregroundColor:
+                canContinue ? Colors.white : AppColors.textSecondary,
+            elevation: canContinue ? 2 : 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(99),
             ),
-            const SizedBox(height: 28),
-
-            // Simple progress indicator
-            const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primarySage),
-              ),
+          ),
+          child: Text(
+            'Continue',
+            style: TextStyle(
+              fontFamily: AppTextStyles.fontFamily,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: canContinue ? Colors.white : AppColors.textSecondary,
             ),
-            const SizedBox(height: 28),
-
-            // Static text without motion
-            Semantics(
-              excludeSemantics: true,
-              child: Text(
-                currentText,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.body16.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// CustomPainter that renders the calm sky scene sequence:
-/// Dawn -> Dusk/Night with twinkling stars -> Final sunrise settling into ready frame.
-class SkyPainter extends CustomPainter {
-  final double animationValue;
+// ─── Sky Canvas Widget ────────────────────────────────────────────────────────
 
-  SkyPainter({required this.animationValue});
+class _SkyCanvas extends StatelessWidget {
+  final AnimationController controller;
+
+  const _SkyCanvas({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        height: 200,
+        child: AnimatedBuilder(
+          animation: controller,
+          builder: (context, _) {
+            final t = controller.value; // 0.0 → 1.0, looping
+            return CustomPaint(
+              painter: _DiurnalSkyPainter(t: t),
+              child: const SizedBox.expand(),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// Renders the diurnal sky cycle, sun/moon arcs, twinkling stars, and dune horizon.
+class _DiurnalSkyPainter extends CustomPainter {
+  final double t; // 0.0..1.0 (looping)
+
+  const _DiurnalSkyPainter({required this.t});
+
+  // ── Sky gradient keyframes (mirrors CSS @keyframes diurnalSkyCycle) ────────
+  static const _skyKeyframes = [
+    // (t, topColor, bottomColor)
+    (0.00, Color(0xFFFDBA74), Color(0xFFFED7AA)), // dawn orange
+    (0.22, Color(0xFF67E8F9), Color(0xFFBAE6FD)), // day cyan
+    (0.45, Color(0xFFF97316), Color(0xFFFDBA74)), // sunset orange
+    (0.54, Color(0xFF312E81), Color(0xFF4338CA)), // dusk indigo
+    (0.75, Color(0xFF0F172A), Color(0xFF1E293B)), // night dark
+    (0.92, Color(0xFF475569), Color(0xFF94A3B8)), // pre-dawn slate
+    (1.00, Color(0xFFFDBA74), Color(0xFFFED7AA)), // dawn orange (wrap)
+  ];
+
+  static const _groundColor = Color(0xFFFAF8F5);
+
+  Color _skyTop() => _interp(t, topColor: true);
+  Color _skyBottom() => _interp(t, topColor: false);
+
+  Color _interp(double v, {required bool topColor}) {
+    for (int i = 0; i < _skyKeyframes.length - 1; i++) {
+      final (t0, top0, bot0) = _skyKeyframes[i];
+      final (t1, top1, bot1) = _skyKeyframes[i + 1];
+      if (v >= t0 && v <= t1) {
+        final p = (v - t0) / (t1 - t0);
+        return topColor
+            ? Color.lerp(top0, top1, p)!
+            : Color.lerp(bot0, bot1, p)!;
+      }
+    }
+    return topColor ? _skyKeyframes.last.$2 : _skyKeyframes.last.$3;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    final horizonY = h * 0.72;
+    final horizonY = h * 0.70;
 
-    // 1. Clip to smooth rounded container
-    final rect = Rect.fromLTWH(0, 0, w, h);
-    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(24));
-    canvas.clipRRect(rrect);
+    // 1. Sky gradient
+    final skyGrad = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [_skyTop(), _skyBottom(), _groundColor],
+      stops: const [0.0, 0.65, 1.0],
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, w, h),
+      Paint()..shader = skyGrad.createShader(Rect.fromLTWH(0, 0, w, h)),
+    );
 
-    // 2. Interpolate sky background color across phases
-    final skyColor = _calculateSkyColor(animationValue);
-    final skyPaint = Paint()..color = skyColor;
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, horizonY), skyPaint);
+    // 2. Stars (visible during night phase: t ∈ 0.45..0.92)
+    _drawStars(canvas, size, t);
 
-    // Subtle ground tint beneath horizon
-    final groundPaint = Paint()..color = AppColors.canvas;
-    canvas.drawRect(Rect.fromLTWH(0, horizonY, w, h - horizonY), groundPaint);
+    // 3. Sun (visible during day half: t ∈ 0..0.48)
+    _drawCelestialBody(
+      canvas: canvas,
+      size: size,
+      horizonY: horizonY,
+      phaseStart: 0.0,
+      phaseEnd: 0.48,
+      visibleStart: 0.04,
+      visibleEnd: 0.44,
+      t: t,
+      isSun: true,
+    );
 
-    // 3. Draw Stars if in dusk/night phase (t in 0.42..0.76)
-    if (animationValue >= 0.42 && animationValue <= 0.76) {
-      _drawStars(canvas, size, animationValue);
-    }
+    // 4. Moon (visible during night half: t ∈ 0.48..1.00)
+    _drawCelestialBody(
+      canvas: canvas,
+      size: size,
+      horizonY: horizonY,
+      phaseStart: 0.48,
+      phaseEnd: 1.00,
+      visibleStart: 0.53,
+      visibleEnd: 0.94,
+      t: t,
+      isSun: false,
+    );
 
-    // 4. Draw Sun 1 (Dawn -> Arc -> Dusk)
-    if (animationValue < 0.42) {
-      final p = (animationValue / 0.42).clamp(0.0, 1.0);
-      final curvedP = Curves.easeInOut.transform(p);
-      final sunX = w * (0.12 + 0.76 * curvedP);
-      final sunY = horizonY - sin(curvedP * pi) * (horizonY * 0.78);
+    // 5. Horizon mist overlay
+    final mistGrad = LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [
+        _groundColor.withValues(alpha: 0.9),
+        _groundColor.withValues(alpha: 0.0),
+      ],
+      stops: const [0.0, 0.5],
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(0, horizonY - 20, w, h - horizonY + 20),
+      Paint()
+        ..shader = mistGrad.createShader(
+          Rect.fromLTWH(0, horizonY - 20, w, h - horizonY + 20),
+        ),
+    );
 
-      _drawSun(canvas, Offset(sunX, sunY), AppColors.sunWarm, 18.0);
-    }
-
-    // 5. Draw Moon (Dusk -> Night arc)
-    if (animationValue >= 0.42 && animationValue < 0.75) {
-      final p = ((animationValue - 0.42) / 0.33).clamp(0.0, 1.0);
-      final curvedP = Curves.easeInOut.transform(p);
-      final moonX = w * (0.12 + 0.76 * curvedP);
-      final moonY = horizonY - sin(curvedP * pi) * (horizonY * 0.72);
-
-      _drawMoon(canvas, Offset(moonX, moonY), 15.0);
-    }
-
-    // 6. Draw Sun 2 (Second Sunrise & Ready Frame)
-    if (animationValue >= 0.75) {
-      final p = ((animationValue - 0.75) / 0.25).clamp(0.0, 1.0);
-      final curvedP = Curves.easeOutCubic.transform(p);
-      final sunX = w * 0.50;
-      final sunY = horizonY - curvedP * (horizonY - h * 0.35);
-
-      final color = Color.lerp(AppColors.sunWarm, AppColors.sunReady, curvedP)!;
-      _drawSun(canvas, Offset(sunX, sunY), color, 20.0, isReady: curvedP > 0.85);
-    }
-
-    // 7. Soft Horizon Line
-    final horizonPaint = Paint()
-      ..color = AppColors.horizonLine
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(0, horizonY), Offset(w, horizonY), horizonPaint);
+    // 6. Rolling dune horizon (3 SVG-style paths)
+    _drawDunes(canvas, size, horizonY);
   }
 
-  Color _calculateSkyColor(double t) {
-    if (t < 0.18) {
-      return Color.lerp(AppColors.skyDawn, AppColors.skyDay, t / 0.18)!;
-    } else if (t < 0.35) {
-      return AppColors.skyDay;
-    } else if (t < 0.44) {
-      final p = (t - 0.35) / 0.09;
-      return Color.lerp(AppColors.skyDay, AppColors.skyDusk, p)!;
-    } else if (t < 0.52) {
-      final p = (t - 0.44) / 0.08;
-      return Color.lerp(AppColors.skyDusk, AppColors.skyNight, p)!;
-    } else if (t < 0.68) {
-      return AppColors.skyNight;
-    } else if (t < 0.76) {
-      final p = (t - 0.68) / 0.08;
-      return Color.lerp(AppColors.skyNight, AppColors.skyDawn, p)!;
-    } else {
-      final p = ((t - 0.76) / 0.24).clamp(0.0, 1.0);
-      return Color.lerp(AppColors.skyDawn, AppColors.canvas, p)!;
+  void _drawCelestialBody({
+    required Canvas canvas,
+    required Size size,
+    required double horizonY,
+    required double phaseStart,
+    required double phaseEnd,
+    required double visibleStart,
+    required double visibleEnd,
+    required double t,
+    required bool isSun,
+  }) {
+    if (t < phaseStart || t > phaseEnd) return;
+    final p = ((t - phaseStart) / (phaseEnd - phaseStart)).clamp(0.0, 1.0);
+    final curvedP = Curves.easeInOut.transform(p);
+
+    // Parabolic arc: left horizon → peak at center → right horizon
+    final x = size.width * (0.1 + 0.8 * curvedP);
+    final arcHeight = horizonY * 0.80;
+    final y = horizonY - math.sin(p * math.pi) * arcHeight;
+
+    // Opacity: fade in/out at horizon edges
+    double opacity = 1.0;
+    if (t < visibleStart) {
+      opacity = ((t - phaseStart) / (visibleStart - phaseStart)).clamp(0.0, 1.0);
+    } else if (t > visibleEnd) {
+      opacity = (1.0 - (t - visibleEnd) / (phaseEnd - visibleEnd)).clamp(0.0, 1.0);
     }
+
+    if (opacity <= 0) return;
+
+    if (isSun) {
+      _drawSun(canvas, Offset(x, y), opacity);
+    } else {
+      _drawMoon(canvas, Offset(x, y), opacity);
+    }
+  }
+
+  void _drawSun(Canvas canvas, Offset center, double opacity) {
+    const sunColor = Color(0xFFD97706); // amber-700
+    // Outer glow
+    canvas.drawCircle(
+      center,
+      20,
+      Paint()
+        ..color = const Color(0xFFFBBF24).withValues(alpha: opacity * 0.4)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
+    );
+    // Inner glow
+    canvas.drawCircle(
+      center,
+      14,
+      Paint()
+        ..color = const Color(0xFFFCD34D).withValues(alpha: opacity * 0.3)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+    // Core
+    canvas.drawCircle(
+      center,
+      11,
+      Paint()..color = sunColor.withValues(alpha: opacity),
+    );
+  }
+
+  void _drawMoon(Canvas canvas, Offset center, double opacity) {
+    const moonColor = Color(0xFFE2E8F0); // slate-200
+    // Glow
+    canvas.drawCircle(
+      center,
+      16,
+      Paint()
+        ..color = const Color(0xFFBFDBFE).withValues(alpha: opacity * 0.25)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+    );
+    // Core
+    canvas.drawCircle(
+      center,
+      10,
+      Paint()..color = moonColor.withValues(alpha: opacity),
+    );
+    // Crescent shadow
+    canvas.drawCircle(
+      Offset(center.dx + 4.5, center.dy - 1.5),
+      8.5,
+      Paint()
+        ..color =
+            const Color(0xFF1E293B).withValues(alpha: opacity * 0.65),
+    );
   }
 
   void _drawStars(Canvas canvas, Size size, double t) {
-    final starCoords = [
-      Offset(size.width * 0.20, size.height * 0.25),
-      Offset(size.width * 0.35, size.height * 0.16),
-      Offset(size.width * 0.62, size.height * 0.20),
-      Offset(size.width * 0.78, size.height * 0.32),
-      Offset(size.width * 0.48, size.height * 0.38),
-      Offset(size.width * 0.84, size.height * 0.18),
+    if (t < 0.45 || t > 0.92) return;
+
+    double starOpacity;
+    if (t < 0.56) {
+      starOpacity = ((t - 0.45) / 0.11).clamp(0.0, 1.0);
+    } else if (t > 0.88) {
+      starOpacity = (1.0 - (t - 0.88) / 0.04).clamp(0.0, 1.0);
+    } else {
+      starOpacity = 1.0;
+    }
+
+    final starPositions = [
+      Offset(size.width * 0.12, size.height * 0.12),
+      Offset(size.width * 0.30, size.height * 0.08),
+      Offset(size.width * 0.55, size.height * 0.14),
+      Offset(size.width * 0.72, size.height * 0.20),
+      Offset(size.width * 0.42, size.height * 0.26),
+      Offset(size.width * 0.85, size.height * 0.10),
+      Offset(size.width * 0.20, size.height * 0.30),
     ];
 
-    double baseOpacity = 1.0;
-    if (t < 0.50) {
-      baseOpacity = ((t - 0.42) / 0.08).clamp(0.0, 1.0);
-    } else if (t > 0.68) {
-      baseOpacity = (1.0 - (t - 0.68) / 0.08).clamp(0.0, 1.0);
-    }
-
-    for (int i = 0; i < starCoords.length; i++) {
-      final twinkle = (0.6 + 0.4 * sin(t * 30.0 + i * 1.5)).clamp(0.0, 1.0);
-      final paint = Paint()
-        ..color = AppColors.starGlow.withValues(alpha: baseOpacity * twinkle);
-      final radius = (i % 2 == 0) ? 1.8 : 1.2;
-      canvas.drawCircle(starCoords[i], radius, paint);
+    for (int i = 0; i < starPositions.length; i++) {
+      final twinkle =
+          (0.55 + 0.45 * math.sin(t * 25.0 + i * 1.8)).clamp(0.0, 1.0);
+      final r = (i % 2 == 0) ? 1.8 : 1.2;
+      canvas.drawCircle(
+        starPositions[i],
+        r,
+        Paint()
+          ..color = Colors.white.withValues(alpha: starOpacity * twinkle),
+      );
     }
   }
 
-  void _drawSun(
-    Canvas canvas,
-    Offset center,
-    Color color,
-    double radius, {
-    bool isReady = false,
-  }) {
-    // Soft outer glow
-    final glowPaint = Paint()
-      ..color = color.withValues(alpha: isReady ? 0.25 : 0.20)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-    canvas.drawCircle(center, radius + 8, glowPaint);
+  void _drawDunes(Canvas canvas, Size size, double horizonY) {
+    final w = size.width;
+    final h = size.height;
 
-    // Concentric calm ring for ready frame
-    if (isReady) {
-      final ringPaint = Paint()
-        ..color = color.withValues(alpha: 0.35)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5;
-      canvas.drawCircle(center, radius + 10, ringPaint);
-    }
+    // Back dune (lighter)
+    final backDunePath = Path()
+      ..moveTo(0, horizonY - 8)
+      ..cubicTo(w * 0.25, horizonY - 28, w * 0.50, horizonY + 5, w * 0.75, horizonY - 16)
+      ..cubicTo(w * 0.875, horizonY - 22, w * 0.944, horizonY - 15, w, horizonY - 13)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..close();
+    canvas.drawPath(
+      backDunePath,
+      Paint()..color = const Color(0xFFE8E2D9).withValues(alpha: 0.5),
+    );
 
-    // Core
-    final corePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, radius, corePaint);
-  }
+    // Mid dune
+    final midDunePath = Path()
+      ..moveTo(0, horizonY)
+      ..cubicTo(w * 0.194, horizonY - 10, w * 0.388, horizonY + 4, w * 0.611, horizonY - 8)
+      ..cubicTo(w * 0.777, horizonY - 14, w * 0.916, horizonY - 1, w, horizonY - 3)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..close();
+    canvas.drawPath(
+      midDunePath,
+      Paint()..color = const Color(0xFFDFD9D1).withValues(alpha: 0.85),
+    );
 
-  void _drawMoon(Canvas canvas, Offset center, double radius) {
-    // Subtle outer glow
-    final glowPaint = Paint()
-      ..color = AppColors.moonGlow.withValues(alpha: 0.20)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
-    canvas.drawCircle(center, radius + 6, glowPaint);
-
-    // Moon core
-    final moonPaint = Paint()..color = AppColors.moonGlow;
-    canvas.drawCircle(center, radius, moonPaint);
-
-    // Crescent shadow
-    final shadowPaint = Paint()..color = AppColors.skyNight.withValues(alpha: 0.65);
-    canvas.drawCircle(
-      center.translate(radius * 0.45, -radius * 0.15),
-      radius * 0.85,
-      shadowPaint,
+    // Foreground dune (solid, matches card bg)
+    final foreDunePath = Path()
+      ..moveTo(0, horizonY + 8)
+      ..cubicTo(w * 0.222, horizonY - 2, w * 0.444, horizonY + 12, w * 0.666, horizonY + 2)
+      ..cubicTo(w * 0.833, horizonY - 5, w * 0.930, horizonY + 3, w, horizonY + 1)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..close();
+    canvas.drawPath(
+      foreDunePath,
+      Paint()..color = const Color(0xFFEDE7DF),
     );
   }
 
   @override
-  bool shouldRepaint(covariant SkyPainter oldDelegate) {
-    return oldDelegate.animationValue != animationValue;
+  bool shouldRepaint(covariant _DiurnalSkyPainter old) => old.t != t;
+}
+
+// ─── Step Indicators Widget ───────────────────────────────────────────────────
+
+class _StepIndicators extends StatelessWidget {
+  final int activeStep; // 0-3; 4 = all done
+
+  const _StepIndicators({required this.activeStep});
+
+  static const _steps = [
+    "You're awake about 16 hours a day",
+    'Folding your hours into tidy piles...',
+    'Teaching the clock to relax...',
+    'Making room for the good stuff...',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9F3EA),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Setup Sequence',
+                style: TextStyle(
+                  fontFamily: AppTextStyles.fontFamily,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                'Min. 4.5s guardrail',
+                style: TextStyle(
+                  fontFamily: 'JetBrains Mono',
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...List.generate(_steps.length, (i) => _StepRow(
+                label: _steps[i],
+                index: i,
+                activeStep: activeStep,
+              )),
+        ],
+      ),
+    );
   }
 }
 
-/// Static sky painter for reduce-motion mode.
-class StaticSkyPainter extends CustomPainter {
+class _StepRow extends StatelessWidget {
+  final String label;
+  final int index;
+  final int activeStep;
+
+  const _StepRow({
+    required this.label,
+    required this.index,
+    required this.activeStep,
+  });
+
   @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final horizonY = h * 0.72;
+  Widget build(BuildContext context) {
+    final isDone = index < activeStep;
+    final isActive = index == activeStep;
+    final isPending = index > activeStep;
 
-    final rect = Rect.fromLTWH(0, 0, w, h);
-    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(24));
-    canvas.clipRRect(rrect);
+    final dotColor = isDone
+        ? AppColors.primarySage
+        : isActive
+            ? const Color(0xFF3B674F) // secondary
+            : const Color(0xFFC0C8C5); // outline-variant
 
-    // Clean background
-    final skyPaint = Paint()..color = AppColors.canvas;
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), skyPaint);
+    final textColor = (isDone || isActive)
+        ? AppColors.textPrimary
+        : AppColors.textSecondary;
+    final rowOpacity = isPending ? 0.4 : 1.0;
 
-    // Horizon line
-    final horizonPaint = Paint()
-      ..color = AppColors.horizonLine
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(0, horizonY), Offset(w, horizonY), horizonPaint);
-
-    // Static settled ready sun
-    final sunCenter = Offset(w * 0.50, h * 0.35);
-    final color = AppColors.sunReady;
-
-    final glowPaint = Paint()
-      ..color = color.withValues(alpha: 0.25)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-    canvas.drawCircle(sunCenter, 28, glowPaint);
-
-    final ringPaint = Paint()
-      ..color = color.withValues(alpha: 0.35)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    canvas.drawCircle(sunCenter, 30, ringPaint);
-
-    final corePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(sunCenter, 20, corePaint);
+    return AnimatedOpacity(
+      opacity: rowOpacity,
+      duration: const Duration(milliseconds: 300),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(
+          children: [
+            // Dot
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: dotColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 10),
+            // Label
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontFamily: AppTextStyles.fontFamily,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: textColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Icon
+            Icon(
+              isDone
+                  ? Icons.check_rounded
+                  : isActive
+                      ? Icons.pending_outlined
+                      : Icons.schedule_rounded,
+              size: 16,
+              color: isDone
+                  ? AppColors.primarySage
+                  : isActive
+                      ? const Color(0xFF3B674F)
+                      : const Color(0xFFC0C8C5),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
