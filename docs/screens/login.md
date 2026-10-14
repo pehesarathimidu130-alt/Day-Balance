@@ -4,7 +4,7 @@ Location: `/mobile/lib/features/auth/presentation/login_screen.dart`
 
 ## Done
 
-- **Rebuild from Figma Flutter Export (`figma/_03_login.dart`)**:
+- **Rebuild from Figma Flutter Export (`design/exports/dart/_03_login.dart`)**:
   - Replaced ad-hoc spacing with exact measurements from CodeTea `.dart` export:
     - 56dp height Top Bar container with 48dp back button aligned with 24dp screen padding.
     - 8dp spacing between Top Bar and title.
@@ -19,7 +19,7 @@ Location: `/mobile/lib/features/auth/presentation/login_screen.dart`
   - Maintained 100% of existing authentication logic (validation, error messaging, token storage, and routing).
 
 - **Design System & Tokens**:
-  - Extracted colors, typography, spacing, and radius tokens from Figma `03_login.png` and `Day-Balance_style_guide.png` into `mobile/lib/core/theme/` (`app_colors.dart`, `app_text_styles.dart`, `app_theme.dart`).
+  - Extracted colors, typography, spacing, and radius tokens from Figma `design/exports/png/03_login.png` and `design/exports/png/Day-Balance_style_guide.png` into `mobile/lib/core/theme/` (`app_colors.dart`, `app_text_styles.dart`, `app_theme.dart`).
   - Configured Roboto font family across styles with compile-time `const` compatibility.
 - **Reusable Components**:
   - `AppPrimaryButton` (`mobile/lib/shared/widgets/primary_button.dart`): 48dp height, pill radius 100, `#49664D` background, loading spinner.

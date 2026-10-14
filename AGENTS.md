@@ -14,10 +14,10 @@ A daily time-budgeting mobile app (Flutter + Node.js + PostgreSQL).
 - **Mobile** (`/mobile`): Flutter 3.29.0, Dart 3.7.0, Material 3, flutter_riverpod, go_router, dio
 - **Backend** (`/backend`): Node.js, Express, TypeScript (strict), Drizzle ORM, PostgreSQL on Neon, JWT auth
 - **Docs** (`/docs`): Handoff documentation for AI continuity
-- **Design** (`/figma`): Figma exports (PNGs + CodeTea Flutter `.dart` exports) and tokens
+- **Design** (`/design`): Figma exports (PNGs in `/design/exports/png/`, CodeTea Flutter `.dart` exports in `/design/exports/dart/`), links (`design/FIGMA_LINKS.md`), and tokens
 
 ## Figma Workflow Rule
-Before building or changing ANY screen, in this order: (1) find its row in figma/FIGMA_LINKS.md; (2) look at the PNG; (3) read the .dart export fully; (4) read the live Figma frame through the Figma MCP using the link in that row (read only that frame, not the whole file); (5) only then plan and build. Use the data as the exact source for sizes, spacing, colors, fonts, text, icons and structure, but rebuild the screen cleanly using our theme tokens (mobile/lib/core/theme) and shared widgets (mobile/lib/shared/widgets), and make it responsive. Never paste exported code unchanged, never import from /figma, never edit /figma. If the sources disagree, do not guess: prefer live Figma values, use the PNG to check the look, and list every disagreement in the report. If any source is missing or the Figma MCP does not work, tell me and ask before continuing. After building, run the screen and compare it with the PNG, and list any differences.
+Before building or changing ANY screen, in this order: (1) find its row in design/FIGMA_LINKS.md; (2) look at the PNG; (3) read the .dart export fully; (4) read the live Figma frame through the Figma MCP using the link in that row (read only that frame, not the whole file); (5) only then plan and build. Use the data as the exact source for sizes, spacing, colors, fonts, text, icons and structure, but rebuild the screen cleanly using our theme tokens (mobile/lib/core/theme) and shared widgets (mobile/lib/shared/widgets), and make it responsive. Never paste exported code unchanged, never import from /design, never edit /design. If the sources disagree, do not guess: prefer live Figma values, use the PNG to check the look, and list every disagreement in the report. If any source is missing or the Figma MCP does not work, tell me and ask before continuing. After building, run the screen and compare it with the PNG, and list any differences.
 
 ## Quick commands
 ```bash

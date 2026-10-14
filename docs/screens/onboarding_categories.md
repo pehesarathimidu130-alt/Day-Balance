@@ -13,4 +13,4 @@ Location: `/mobile/lib/features/onboarding/presentation/onboarding_categories_sc
 - Navigates to `/home` on completion
 
 ## Notes for the next developer
-- Rebuild UI strictly according to Figma design (`/figma/07_choose_categories.png`) when instructed.
+- Rebuild UI strictly according to Figma design (`design/exports/png/07_choose_categories.png` and `design/exports/dart/_07_choose_categories.dart`) when instructed.

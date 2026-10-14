@@ -12,7 +12,7 @@ Location: `/mobile/lib/features/timer/presentation/`
 - [ ] Overtime: when remaining hits 0, show count-up in red + fire local notification
 - [ ] "Edit plan" button navigates to `/plan`
 - [ ] Refresh timer state on app resume (call GET `/api/timer/status`)
-- [ ] Match Figma design from `/figma/`
+- [ ] Match Figma design from `/design/exports/`
 
 ## Notes for the next developer
 - Timer display is client-side computed, refreshed every second via a periodic timer
