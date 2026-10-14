@@ -1,76 +1,134 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-/// Centralized text style tokens for the Day-Balance app.
-/// Replace these placeholder values with actual design tokens from Figma.
+/// Centralized text style tokens matching Day-Balance Figma Style Guide (02 / TYPE):
+/// Font: Roboto
 class AppTextStyles {
   AppTextStyles._();
 
-  // Headings
-  static const TextStyle h1 = TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-    letterSpacing: -0.5,
-  );
+  static const String _fontFamily = 'Roboto';
+  static const String _monoFontFamily = 'RobotoMono';
 
-  static const TextStyle h2 = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
-    letterSpacing: -0.3,
-  );
-
-  static const TextStyle h3 = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
-  );
-
-  // Body
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
-  );
-
-  static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
-  );
-
-  static const TextStyle bodySmall = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w400,
-    color: AppColors.textSecondary,
-  );
-
-  // Labels & buttons
-  static const TextStyle label = TextStyle(
-    fontSize: 14,
+  // Display 40/44 (Roboto Medium)
+  static const TextStyle display = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 40,
+    height: 44 / 40,
     fontWeight: FontWeight.w500,
-    color: AppColors.textSecondary,
+    color: AppColors.text,
   );
 
-  static const TextStyle button = TextStyle(
+  // Heading 32/38 (Roboto Medium) - Login Title "Good to see you."
+  static const TextStyle heading = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 32,
+    height: 38 / 32,
+    fontWeight: FontWeight.w500,
+    color: AppColors.text,
+  );
+
+  // Title 22 (Roboto Medium)
+  static const TextStyle title = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 22,
+    fontWeight: FontWeight.w500,
+    color: AppColors.text,
+  );
+
+  // Body 16/22 (Roboto Regular) - Subtitle "Log in and pick up where you left off."
+  static const TextStyle body16 = TextStyle(
+    fontFamily: _fontFamily,
     fontSize: 16,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textOnPrimary,
+    height: 22 / 16,
+    fontWeight: FontWeight.w400,
+    color: AppColors.secondary,
   );
 
-  // Timer display
+  // Body 14/20 (Roboto Regular) - Input text, body
+  static const TextStyle body14 = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 14,
+    height: 20 / 14,
+    fontWeight: FontWeight.w400,
+    color: AppColors.text,
+  );
+
+  // Caption 12/17 (Roboto Regular) - Floating labels
+  static const TextStyle caption12 = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 12,
+    height: 17 / 12,
+    fontWeight: FontWeight.w400,
+    color: AppColors.secondary,
+  );
+
+  // Buttons: Roboto Semibold 14/20
+  static const TextStyle button = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 14,
+    height: 20 / 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.white,
+  );
+
+  // Outlined Button text: Roboto Semibold 14/20
+  static const TextStyle buttonOutlined = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 14,
+    height: 20 / 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.text,
+  );
+
+  // Action link ("Forgot password?")
+  static const TextStyle link = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.primarySage,
+  );
+
+  // Error text (Roboto Regular 12/17 #A43B32)
+  static const TextStyle error = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 12,
+    height: 17 / 12,
+    fontWeight: FontWeight.w400,
+    color: AppColors.error,
+  );
+
+  // Focus 52/62 (Roboto Mono Medium) - Large Timer
   static const TextStyle timerLarge = TextStyle(
-    fontSize: 48,
-    fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
-    fontFeatures: [FontFeature.tabularFigures()],
+    fontFamily: _monoFontFamily,
+    fontSize: 52,
+    height: 62 / 52,
+    fontWeight: FontWeight.w500,
+    color: AppColors.text,
   );
 
-  static const TextStyle timerSmall = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
-    fontFeatures: [FontFeature.tabularFigures()],
+  // Card 30/36 (Roboto Mono Medium) - Medium Timer
+  static const TextStyle timerMedium = TextStyle(
+    fontFamily: _monoFontFamily,
+    fontSize: 30,
+    height: 36 / 30,
+    fontWeight: FontWeight.w500,
+    color: AppColors.text,
   );
+
+  // Small metadata 10-11 (Roboto Mono Medium)
+  static const TextStyle metadata = TextStyle(
+    fontFamily: _monoFontFamily,
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    color: AppColors.secondary,
+  );
+
+  // Backward compatibility aliases (as const)
+  static const TextStyle h1 = heading;
+  static const TextStyle h2 = title;
+  static const TextStyle h3 = title;
+  static const TextStyle bodyLarge = body16;
+  static const TextStyle bodyMedium = body14;
+  static const TextStyle bodySmall = caption12;
+  static const TextStyle label = caption12;
 }
