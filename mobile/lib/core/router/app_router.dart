@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/presentation/welcome_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/onboarding/presentation/onboarding_schedule_screen.dart';
@@ -28,9 +29,14 @@ class _PlaceholderScreen extends StatelessWidget {
 
 /// App router configuration using go_router.
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/welcome',
   routes: [
-    // Auth
+    // Auth & Welcome
+    GoRoute(
+      path: '/welcome',
+      name: 'welcome',
+      builder: (context, state) => const WelcomeScreen(),
+    ),
     GoRoute(
       path: '/login',
       name: 'login',

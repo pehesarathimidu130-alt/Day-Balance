@@ -7,7 +7,7 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: DayBalanceApp()));
     await tester.pumpAndSettle();
 
-    // Verify login screen renders heading matching Figma
-    expect(find.text('Good to see you.'), findsOneWidget);
+    // Verify initial launch renders WelcomeScreen heading matching Figma
+    expect(find.text('Make room\nfor your day.'), findsOneWidget);
   });
 }

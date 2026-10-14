@@ -173,6 +173,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 onPressed: () {
                                   if (context.canPop()) {
                                     context.pop();
+                                  } else {
+                                    context.go('/welcome');
                                   }
                                 },
                               ),
