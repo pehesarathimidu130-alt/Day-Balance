@@ -1,0 +1,61 @@
+# ─── Flutter (mobile/) ────────────────────────────────────────────────
+mobile/.dart_tool/
+mobile/.packages
+mobile/.pub-cache/
+mobile/.pub/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/local.properties
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/.metadata
+*.iml
+
+# ─── Node.js (backend/) ──────────────────────────────────────────────
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/*.log
+
+# ─── General ─────────────────────────────────────────────────────────
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# IDEs / Editors
+.idea/
+*.ipr
+*.iws
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+*.tsbuildinfo
+
+# NEVER ignore docs or design
+# /docs
+# /design
