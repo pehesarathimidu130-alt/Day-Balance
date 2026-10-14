@@ -16,6 +16,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   CORS_ORIGIN: z.string().default('*'),
+  TEST_USER_PASSWORD: z.string().min(8, 'TEST_USER_PASSWORD must be at least 8 characters').optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

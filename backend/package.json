@@ -12,6 +12,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed.ts",
+    "create-test-user": "tsx src/scripts/create-test-user.ts",
     "test:neon": "tsx src/scripts/test-neon-services.ts",
     "lint": "tsc --noEmit"
   },

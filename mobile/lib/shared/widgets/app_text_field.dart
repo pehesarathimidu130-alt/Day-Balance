@@ -54,7 +54,7 @@ class AppTextField extends StatelessWidget {
           onChanged: onChanged,
           onFieldSubmitted: onSubmitted,
           validator: validator,
-          style: AppTextStyles.body14.copyWith(
+          style: AppTextStyles.body16.copyWith(
             color: isEnabled ? AppColors.text : AppColors.secondary,
           ),
           cursorColor: AppColors.primarySage,
@@ -70,7 +70,7 @@ class AppTextField extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
             hintText: hintText,
-            hintStyle: AppTextStyles.body14.copyWith(
+            hintStyle: AppTextStyles.body16.copyWith(
               color: AppColors.outline,
             ),
             suffixIcon: suffixIcon,
@@ -122,13 +122,10 @@ class AppTextField extends StatelessWidget {
           ),
         ),
         if (hasError) ...[
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(
-              errorText!,
-              style: AppTextStyles.error,
-            ),
+          const SizedBox(height: 4),
+          Text(
+            errorText!,
+            style: AppTextStyles.error,
           ),
         ],
       ],

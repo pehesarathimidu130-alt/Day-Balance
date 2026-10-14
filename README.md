@@ -60,9 +60,27 @@ flutter analyze       # verify no lint errors
 flutter run           # run on emulator or device
 ```
 
-> **Android Emulator**: The app is pre-configured to reach the backend at `http://10.0.2.2:3000` (the Android emulator's alias for the host machine's localhost).
->
-> **Physical Device**: Change the `baseUrl` in `mobile/lib/core/constants/api_constants.dart` to your machine's LAN IP.
+### Mobile API Configuration & Platform Resolution
+
+The API base URL is configured in a single place: [`mobile/lib/core/constants/api_constants.dart`](mobile/lib/core/constants/api_constants.dart).
+- **Web (`kIsWeb`)**: Defaults to `http://localhost:3000`
+- **Android Emulator**: Defaults to `http://10.0.2.2:3000` (maps to host localhost)
+- **Physical Android Phone**: Run `adb reverse tcp:3000 tcp:3000` and pass `--dart-define=API_BASE_URL=http://localhost:3000`
+
+#### Overriding with `--dart-define`
+
+You can override the base URL for any platform or environment without editing code:
+```bash
+# Physical device with adb reverse:
+adb reverse tcp:3000 tcp:3000
+flutter run --dart-define=API_BASE_URL=http://localhost:3000
+
+# Physical device over local Wi-Fi / LAN IP:
+flutter run --dart-define=API_BASE_URL=http://192.168.1.100:3000
+
+# Web on custom port:
+flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:3000
+```
 
 ### Environment Variables
 

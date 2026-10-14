@@ -151,31 +151,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 12),
-                      // Back Button (Material Symbols / Arrow Back, >=48dp touch target)
-                      Semantics(
-                        label: 'Back',
-                        button: true,
-                        child: SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: IconButton(
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.zero,
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              size: 24,
-                              color: AppColors.text,
+                      // Top App Bar area (56dp height matching Figma export, aligned with 24dp screen padding)
+                      SizedBox(
+                        height: 56,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Semantics(
+                            label: 'Back',
+                            button: true,
+                            child: SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: IconButton(
+                                alignment: Alignment.centerLeft,
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(
+                                  Icons.arrow_back,
+                                  size: 24,
+                                  color: AppColors.text,
+                                ),
+                                onPressed: () {
+                                  if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.go('/welcome');
+                                  }
+                                },
+                              ),
                             ),
-                            onPressed: () {
-                              if (context.canPop()) {
-                                context.pop();
-                              }
-                            },
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 8),
 
                       // Title: "Good to see you." (Heading 32/38 Roboto Medium #292E28)
                       Text(
@@ -189,7 +196,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         'Log in and pick up\nwhere you left off.',
                         style: AppTextStyles.body16,
                       ),
-                      const SizedBox(height: 32),
+                      // 40dp margin below header block matching _03_login.dart line 80
+                      const SizedBox(height: 40),
 
                       // General server error banner if network/server issue
                       if (_generalError != null) ...[
@@ -208,7 +216,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ],
 
-                      // Email Field (Floating label "Email", radius 4)
+                      // Email Field (Floating label "Email", radius 4, 16sp text)
                       AppTextField(
                         controller: _emailController,
                         focusNode: _emailFocusNode,
@@ -223,7 +231,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           _passwordFocusNode.requestFocus();
                         },
                       ),
-                      const SizedBox(height: 16),
+                      // 24dp margin between fields matching _03_login.dart line 134
+                      const SizedBox(height: 24),
 
                       // Password Field (Floating label "Password", show/hide toggle, radius 4)
                       AppPasswordField(
@@ -236,29 +245,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onChanged: (_) => _clearErrors(),
                         onSubmitted: (_) => _handleLogin(),
                       ),
-                      const SizedBox(height: 12),
+                      // 16dp spacing above "Forgot password?" matching _03_login.dart line 291
+                      const SizedBox(height: 16),
 
-                      // "Forgot password?" Link (Right-aligned, Roboto Semibold 14, #49664D)
+                      // "Forgot password?" Link (Right-aligned, Roboto Semibold 14, #49664D, right: 3)
                       Align(
                         alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: isLoading ? null : _handleForgotPassword,
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.primarySage,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 12,
+                        child: Semantics(
+                          label: 'Forgot password',
+                          button: true,
+                          child: InkWell(
+                            onTap: isLoading ? null : _handleForgotPassword,
+                            borderRadius: BorderRadius.circular(4),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                right: 3,
+                                top: 6,
+                                bottom: 6,
+                                left: 8,
+                              ),
+                              child: Text(
+                                'Forgot password?',
+                                style: AppTextStyles.link,
+                              ),
                             ),
-                            minimumSize: const Size(48, 48),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'Forgot password?',
-                            style: AppTextStyles.link,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      // 26dp spacing (total 32dp from link to button) matching _03_login.dart lines 291 + 310
+                      const SizedBox(height: 26),
 
                       // Primary Button: "Log in" (Height 48dp, Pill radius 100, #49664D)
                       AppPrimaryButton(
@@ -268,9 +283,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed: _handleLogin,
                       ),
 
-                      // Flexible spacer to push bottom CTA down on larger displays
+                      // Flexible spacer pushing bottom section down on larger displays
                       const Spacer(),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 40),
 
                       // "New to Day-Balance?" Prompt (Roboto Regular 14, #62675D)
                       Text(
@@ -279,7 +294,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           color: AppColors.secondary,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      // 16dp margin between prompt and button matching _03_login.dart line 355
+                      const SizedBox(height: 16),
 
                       // Secondary Button: "Create an account" (Height 48dp, Pill radius 100, outlined)
                       AppSecondaryButton(
@@ -289,6 +305,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           context.go('/register');
                         },
                       ),
+                      // 24dp bottom margin matching _03_login.dart line 349
                       const SizedBox(height: 24),
                     ],
                   ),

@@ -23,7 +23,7 @@ async function testLoginFlow() {
     }),
   });
 
-  const regData = await regRes.json();
+  const regData: any = await regRes.json();
   if (regRes.status !== 201) {
     throw new Error(`Registration failed (${regRes.status}): ${JSON.stringify(regData)}`);
   }
@@ -43,7 +43,7 @@ async function testLoginFlow() {
         password: 'WrongPassword!',
       }),
     });
-    const wrongData = await wrongRes.json();
+    const wrongData: any = await wrongRes.json();
     console.log(`✓ Received status ${wrongRes.status} (expected 401).`);
     console.log(`✓ Error response: "${wrongData.error}"`);
     if (wrongRes.status !== 401 || wrongData.error !== 'Invalid email or password') {
@@ -60,7 +60,7 @@ async function testLoginFlow() {
         password: testPassword,
       }),
     });
-    const loginData = await loginRes.json();
+    const loginData: any = await loginRes.json();
     if (loginRes.status !== 200) {
       throw new Error(`Login failed (${loginRes.status}): ${JSON.stringify(loginData)}`);
     }
@@ -79,7 +79,7 @@ async function testLoginFlow() {
         refreshToken: loginData.data.tokens.refreshToken,
       }),
     });
-    const refreshData = await refreshRes.json();
+    const refreshData: any = await refreshRes.json();
     if (refreshRes.status !== 200) {
       throw new Error(`Refresh failed (${refreshRes.status}): ${JSON.stringify(refreshData)}`);
     }
