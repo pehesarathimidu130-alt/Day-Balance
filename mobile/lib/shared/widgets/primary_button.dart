@@ -12,11 +12,12 @@ class AppPrimaryButton extends StatelessWidget {
 
   const AppPrimaryButton({
     super.key,
-    required this.text,
+    String? text,
+    String? label,
     required this.onPressed,
     this.isLoading = false,
     this.isEnabled = true,
-  });
+  }) : text = label ?? text ?? '';
 
   @override
   Widget build(BuildContext context) {

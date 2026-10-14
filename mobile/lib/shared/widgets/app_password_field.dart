@@ -14,6 +14,7 @@ class AppPasswordField extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final bool isEnabled;
   final FocusNode? focusNode;
+  final String? Function(String?)? validator;
 
   const AppPasswordField({
     super.key,
@@ -26,6 +27,7 @@ class AppPasswordField extends StatefulWidget {
     this.onSubmitted,
     this.isEnabled = true,
     this.focusNode,
+    this.validator,
   });
 
   @override
@@ -49,6 +51,7 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       isEnabled: widget.isEnabled,
+      validator: widget.validator,
       suffixIcon: Semantics(
         label: _obscureText ? 'Show password' : 'Hide password',
         button: true,
