@@ -108,13 +108,9 @@ class OnboardingCategoriesScreen extends ConsumerWidget {
                     // Primary Button: "Plan my day"
                     AppPrimaryButton(
                       label: 'Plan my day',
-                      isLoading: state.isLoading,
                       isEnabled: state.selectedCategories.isNotEmpty,
-                      onPressed: () async {
-                        final ok = await controller.completeOnboarding();
-                        if (ok && context.mounted) {
-                          context.go('/home');
-                        }
+                      onPressed: () {
+                        context.go('/onboarding/setting-up');
                       },
                     ),
                     const SizedBox(height: 32),

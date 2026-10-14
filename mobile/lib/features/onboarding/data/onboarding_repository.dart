@@ -81,6 +81,38 @@ class OnboardingRepository {
       throw Exception(msg);
     }
   }
+
+  /// Fetches aggregate similar routines statistics.
+  /// Enforces <= 1500ms timeout.
+  /// Never throws: returns { 'showable': false, 'similarCount': null } on any error or timeout.
+  Future<Map<String, dynamic>> getSimilarRoutines({
+    String? wakeTime,
+    String? bedtime,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (wakeTime != null) queryParams['wakeTime'] = wakeTime;
+      if (bedtime != null) queryParams['bedtime'] = bedtime;
+
+      final response = await _dio.get(
+        '/api/stats/similar-routines',
+        queryParameters: queryParams,
+        options: Options(
+          receiveTimeout: const Duration(milliseconds: 1500),
+          sendTimeout: const Duration(milliseconds: 1500),
+        ),
+      );
+
+      final data = response.data['data'] as Map<String, dynamic>;
+      return data;
+    } catch (_) {
+      return {
+        'showable': false,
+        'similarCount': null,
+        'totalUsers': 0,
+      };
+    }
+  }
 }
 
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {

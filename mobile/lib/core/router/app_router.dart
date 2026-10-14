@@ -7,6 +7,7 @@ import '../../features/onboarding/presentation/onboarding_schedule_screen.dart';
 import '../../features/onboarding/presentation/onboarding_routine_screen.dart';
 import '../../features/onboarding/presentation/onboarding_result_screen.dart';
 import '../../features/onboarding/presentation/onboarding_categories_screen.dart';
+import '../../features/onboarding/presentation/setting_up_screen.dart';
 import '../../features/planning/presentation/plan_screen.dart';
 import 'app_transitions.dart';
 
@@ -90,6 +91,14 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) => AppTransitions.sharedAxis(
         state: state,
         child: const OnboardingCategoriesScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/onboarding/setting-up',
+      name: 'onboarding-setting-up',
+      pageBuilder: (context, state) => AppTransitions.fadeThrough(
+        state: state,
+        child: const SettingUpScreen(),
       ),
     ),
 

@@ -47,4 +47,15 @@ class AppColors {
   static const Color warning = Color(0xFFEBD3BC);
   static const Color overtime = error;
   static const Color disabled = Color(0xFFDDDCD2);
+
+  // 02 / Sky & Celestial Animation Tokens (Setting Up Screen)
+  static const Color sunWarm = Color(0xFFE5A855); // Warm amber sunrise / daytime sun
+  static const Color sunReady = primarySage; // Sage brand sun settling as ready frame
+  static const Color moonGlow = Color(0xFFEDE8DF); // Soft moon illumination
+  static const Color skyDawn = Color(0xFFF5EBE0); // Dawn sky tint
+  static const Color skyDay = Color(0xFFEBF1E8); // Midday light sky tint
+  static const Color skyDusk = Color(0xFF6E687A); // Dusk lavender-tinted sky
+  static const Color skyNight = Color(0xFF262A33); // Deep night sky
+  static const Color starGlow = Color(0xFFFFFDF5); // Twinkling night stars
+  static const Color horizonLine = divider; // Soft horizon divider (#DDDCD2)
 }

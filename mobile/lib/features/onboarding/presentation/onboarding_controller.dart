@@ -208,6 +208,28 @@ class OnboardingController extends Notifier<OnboardingState> {
       return false;
     }
   }
+
+  /// Full save of all onboarding preferences:
+  /// wake time, bedtime, routine minutes, categories, and onboardingDone = true.
+  Future<bool> completeFullOnboarding() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final repo = ref.read(onboardingRepositoryProvider);
+      await repo.updateUserCategories(state.selectedCategories.toList());
+      await repo.updateProfile(
+        wakeTime: _formatTimeOfDay(state.wakeTime),
+        bedtime: _formatTimeOfDay(state.bedtime),
+        routineMinutes: state.routineMinutes,
+        onboardingDone: true,
+      );
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      state = state.copyWith(isLoading: false, errorMessage: msg);
+      return false;
+    }
+  }
 }
 
 final onboardingControllerProvider =
