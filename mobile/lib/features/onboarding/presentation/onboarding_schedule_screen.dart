@@ -2,40 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_icons.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/widgets/app_back_button.dart';
+import '../../../shared/widgets/app_time_picker.dart';
+import '../../../shared/widgets/primary_button.dart';
+import '../../../shared/widgets/step_progress_bar.dart';
+import '../../../shared/widgets/tap_field.dart';
 import 'onboarding_controller.dart';
 
 class OnboardingScheduleScreen extends ConsumerWidget {
   const OnboardingScheduleScreen({super.key});
 
-  Future<void> _pickTime({
-    required BuildContext context,
-    required WidgetRef ref,
-    required TimeOfDay initialTime,
-    required void Function(TimeOfDay) onSelected,
-  }) async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            timePickerTheme: TimePickerThemeData(
-              backgroundColor: AppColors.surface,
-              hourMinuteColor: AppColors.surfaceVariant,
-              hourMinuteTextColor: AppColors.textPrimary,
-              dialHandColor: AppColors.primary,
-              dialBackgroundColor: AppColors.surfaceVariant,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      onSelected(picked);
-    }
+  String _formatTime(TimeOfDay t) {
+    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+    final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final m = t.minute.toString().padLeft(2, '0');
+    return '$h:$m $period';
   }
 
   @override
@@ -43,219 +26,193 @@ class OnboardingScheduleScreen extends ConsumerWidget {
     final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
 
+    // Calculate awake and sleep progress fractions
+    final double awakeFraction = (state.grossWakingMinutes / (24 * 60)).clamp(0.05, 0.95);
+    final double sleepFraction = 1.0 - awakeFraction;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Step 1 of 3', style: AppTextStyles.label),
-        centerTitle: true,
-      ),
+      backgroundColor: AppColors.backgroundCream,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 12),
-              const Text(
-                'Set Your Daily Schedule',
-                style: AppTextStyles.h1,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Tell us when your day begins and ends. We will use this to calculate your daily waking hours.',
-                style: AppTextStyles.bodyMedium,
-              ),
-              const SizedBox(height: 32),
-
-              // Wake Time Selector
-              _TimeCard(
-                title: 'Wake-up Time',
-                time: state.wakeTime.format(context),
-                icon: Icons.wb_sunny_rounded,
-                iconColor: const Color(0xFFF39C12),
-                onTap: () => _pickTime(
-                  context: context,
-                  ref: ref,
-                  initialTime: state.wakeTime,
-                  onSelected: controller.setWakeTime,
+        child: Column(
+          children: [
+            // Top App Bar
+            Padding(
+              padding: const EdgeInsets.only(left: 12, top: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: AppBackButton(
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/register');
+                    }
+                  },
                 ),
               ),
-              const SizedBox(height: 16),
+            ),
 
-              // Bedtime Selector
-              _TimeCard(
-                title: 'Bedtime',
-                time: state.bedtime.format(context),
-                icon: Icons.nightlight_round,
-                iconColor: const Color(0xFF5B6987),
-                onTap: () => _pickTime(
-                  context: context,
-                  ref: ref,
-                  initialTime: state.bedtime,
-                  onSelected: controller.setBedtime,
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              // Calculated Waking Hours Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.12),
-                      AppColors.primary.withValues(alpha: 0.04),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.25),
-                  ),
-                ),
-                child: Row(
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.hourglass_top_rounded,
-                        color: Colors.white,
-                        size: 26,
-                      ),
+                    const SizedBox(height: 8),
+
+                    // Step 1 of 3 Progress Bar
+                    const StepProgressBar(currentStep: 1),
+                    const SizedBox(height: 32),
+
+                    // Headings
+                    const Text(
+                      'When does your day begin?',
+                      style: AppTextStyles.h1,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Start with your usual rhythm. You can change this whenever life shifts.',
+                      style: AppTextStyles.body14,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Wake-up Time Field
+                    TapField(
+                      label: 'Wake-up time',
+                      value: _formatTime(state.wakeTime),
+                      onTap: () async {
+                        final picked = await showAppTimePicker(
+                          context: context,
+                          title: 'Wake-up time',
+                          initialTime: state.wakeTime,
+                        );
+                        if (picked != null) {
+                          controller.setWakeTime(picked);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Bedtime Field
+                    TapField(
+                      label: 'Bedtime',
+                      value: _formatTime(state.bedtime),
+                      onTap: () async {
+                        final picked = await showAppTimePicker(
+                          context: context,
+                          title: 'Bedtime',
+                          initialTime: state.bedtime,
+                        );
+                        if (picked != null) {
+                          controller.setBedtime(picked);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Hours Awake Card (Figma: #EEE8DC, radius 16)
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppColors.cardWarm,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.all(24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Estimated Waking Time',
-                            style: AppTextStyles.bodySmall,
+                          Row(
+                            children: [
+                              Icon(
+                                AppIcons.hoursAwake,
+                                size: 24,
+                                color: AppColors.secondary,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Hours awake',
+                                style: AppTextStyles.body14,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 16),
                           Text(
                             state.grossHoursFormatted,
-                            style: AppTextStyles.h2.copyWith(
-                              color: AppColors.primary,
+                            style: AppTextStyles.h1.copyWith(
+                              fontSize: 40,
+                              height: 1.1,
                             ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // 2-segment progress bar: awake vs sleep
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: SizedBox(
+                              height: 8,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: (awakeFraction * 1000).toInt(),
+                                    child: Container(
+                                      color: AppColors.primarySage,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    flex: (sleepFraction * 1000).toInt(),
+                                    child: Container(
+                                      color: AppColors.trackGrey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            state.awakeRangeFormatted,
+                            style: AppTextStyles.caption12,
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                    const SizedBox(height: 24),
 
-              const Spacer(),
+                    // Transition caption
+                    const Text(
+                      'Next, we’ll make room for your routines.',
+                      style: AppTextStyles.caption12,
+                    ),
+                    const SizedBox(height: 16),
 
-              // Error display if any
-              if (state.errorMessage != null) ...[
-                Text(
-                  state.errorMessage!,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.error,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-              ],
+                    if (state.errorMessage != null) ...[
+                      Text(
+                        state.errorMessage!,
+                        style: AppTextStyles.caption12.copyWith(
+                          color: AppColors.errorRed,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
 
-              // Next Button
-              ElevatedButton(
-                onPressed: state.isLoading
-                    ? null
-                    : () async {
+                    // Continue Button
+                    AppPrimaryButton(
+                      label: 'Continue',
+                      isLoading: state.isLoading,
+                      onPressed: () async {
                         final ok = await controller.saveSchedule();
                         if (ok && context.mounted) {
                           context.go('/onboarding/routine');
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 2,
-                ),
-                child: state.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Text('Next: Daily Routine', style: AppTextStyles.button),
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TimeCard extends StatelessWidget {
-  final String title;
-  final String time;
-  final IconData icon;
-  final Color iconColor;
-  final VoidCallback onTap;
-
-  const _TimeCard({
-    required this.title,
-    required this.time,
-    required this.icon,
-    required this.iconColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: iconColor, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: AppTextStyles.bodySmall),
-                    const SizedBox(height: 4),
-                    Text(time, style: AppTextStyles.h3),
+                    ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
-              const Icon(Icons.edit_calendar_rounded, color: AppColors.textSecondary),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

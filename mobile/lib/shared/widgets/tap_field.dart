@@ -10,6 +10,7 @@ class TapField extends StatelessWidget {
   final String value;
   final VoidCallback onTap;
   final Color backgroundColor;
+  final IconData? icon;
 
   const TapField({
     super.key,
@@ -17,6 +18,7 @@ class TapField extends StatelessWidget {
     required this.value,
     required this.onTap,
     this.backgroundColor = AppColors.canvas,
+    this.icon,
   });
 
   @override
@@ -48,8 +50,8 @@ class TapField extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  const Icon(
-                    AppIcons.dropdown,
+                  Icon(
+                    icon ?? AppIcons.dropdown,
                     size: 20,
                     color: AppColors.secondary,
                   ),

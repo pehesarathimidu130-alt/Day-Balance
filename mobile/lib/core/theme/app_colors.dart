@@ -24,6 +24,10 @@ class AppColors {
   // Semantic & Backwards Compatibility Aliases
   static const Color primary = primarySage;
   static const Color background = canvas;
+  static const Color backgroundCream = canvas;
+  static const Color cardWarm = paper;
+  static const Color trackGrey = divider;
+  static const Color errorRed = error;
   static const Color surfaceVariant = paper;
   static const Color textPrimary = text;
   static const Color textSecondary = secondary;
