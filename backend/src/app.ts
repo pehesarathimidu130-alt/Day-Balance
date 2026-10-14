@@ -8,6 +8,7 @@ import { usersRouter } from './modules/users';
 import { categoriesRouter } from './modules/categories';
 import { plansRouter } from './modules/plans';
 import { timerRouter } from './modules/timer';
+import { statsRouter } from './modules/stats';
 import { errorHandler } from './middleware/error-handler';
 
 const app = express();
@@ -56,6 +57,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/plans', plansRouter);
 app.use('/api/timer', timerRouter);
+app.use('/api/stats', statsRouter);
 
 // Global Error Handler
 app.use(errorHandler);

@@ -14,7 +14,8 @@
     "db:seed": "tsx src/db/seed.ts",
     "create-test-user": "tsx src/scripts/create-test-user.ts",
     "test:neon": "tsx src/scripts/test-neon-services.ts",
-    "test": "tsx src/scripts/test-login-flow.ts",
+    "test:stats": "tsx src/scripts/test-stats-endpoint.ts",
+    "test": "tsx src/scripts/test-login-flow.ts && tsx src/scripts/test-stats-endpoint.ts",
     "lint": "tsc --noEmit"
   },
   "keywords": [],
