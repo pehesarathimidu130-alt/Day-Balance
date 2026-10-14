@@ -11,6 +11,7 @@ Location: `/backend/.env.example`, `/backend/src/config/env.ts`
   - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3`, `AWS_REGION` (Neon Object Storage S3-compatible credentials)
   - `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`
   - `PORT`, `NODE_ENV`, `CORS_ORIGIN`
+  - `TEST_USER_PASSWORD` (min 8 chars, used by `npm run create-test-user`)
 - Created `src/config/env.ts` — Zod schema validation validating all variables with defaults where appropriate
 - Populated `backend/.env` with live Neon credentials and verified end-to-end against live database and bucket
 

@@ -1,5 +1,5 @@
 # Auth Module
-Status: DRAFT
+Status: DONE
 Location: `/backend/src/modules/auth/`
 
 ## Done
@@ -30,6 +30,11 @@ Location: `/backend/src/modules/auth/`
   - Attaches `req.userId` for downstream routes or responds with 401
 - Extended Express Request type definitions in `src/types/express.d.ts` for `userId`
 - Mounted `/api/auth` router and `errorHandler` middleware in `app.ts`
+- Created `src/scripts/create-test-user.ts` (`npm run create-test-user`):
+  - Registers `test@daybalance.dev` via `AuthService.register()`
+  - Reads password from `TEST_USER_PASSWORD` environment variable (minimum 8 characters)
+  - Safe to run multiple times (idempotent; checks for existing user first)
+- Verified live with real backend HTTP requests against Neon database (`test-login-flow.ts`)
 
 ## Notes for the next developer
 - Passwords: use argon2. Never log passwords or tokens.
