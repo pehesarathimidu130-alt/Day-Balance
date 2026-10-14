@@ -16,17 +16,17 @@
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
 | [Backend Setup](setup/backend_setup.md) | DONE | Express + TS + Drizzle project, health endpoint, DB connection | Verified live: Express server running, Neon DB & Object Storage connected |
-| [Mobile Setup](setup/mobile_setup.md) | DONE | Flutter project, dependencies, folder structure, theme, router | Verified with `flutter analyze` and `flutter test` smoke test |
+| [Mobile Setup](setup/mobile_setup.md) | DONE | Flutter project, dependencies, folder structure, theme, router | Verified with `flutter analyze` and `flutter test` |
 | [Database Schema](backend/database_schema.md) | DONE | Drizzle schema with all tables, seed script | Verified live: schema pushed to Neon PostgreSQL and 7 categories seeded |
-| [Environment Config](setup/environment_config.md) | DONE | .env.example, zod validation, required variables | Verified live: Neon DB, S3 Object Storage, and TEST_USER_PASSWORD environment variables loaded |
+| [Environment Config](setup/environment_config.md) | DONE | .env.example, zod validation, required variables | Verified live: Neon DB, S3 Object Storage, and secrets loaded |
 
 ## Backend Modules
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Auth Module](backend/auth.md) | DONE | Register, login, logout, refresh, delete account | Verified live with real backend HTTP requests and Neon DB; create-test-user script added |
-| [Users Module](backend/users.md) | DRAFT | Profile, onboarding fields | Endpoints written and compile, not tested end-to-end |
-| [Categories Module](backend/categories.md) | DRAFT | List categories, user selection | Endpoints written and compile, not tested end-to-end |
+| [Auth Module](backend/auth.md) | DONE | Register, login, logout, refresh, delete account | Verified live with real backend HTTP requests and Neon DB |
+| [Users Module](backend/users.md) | DONE | Profile, onboarding fields (wakeTime, bedtime, routineMinutes, onboardingDone) | Verified live with `test-onboarding-flow.ts` against Neon DB |
+| [Categories Module](backend/categories.md) | DONE | List categories, user selection (`/api/categories/mine`) | Verified live with `test-onboarding-flow.ts` against Neon DB |
 | [Plans Module](backend/plans.md) | DRAFT | Daily plans, plan items CRUD | Endpoints written and compile, not tested end-to-end |
 | [Timer Module](backend/timer.md) | DRAFT | Start/pause/resume, time entries, timer math | Endpoints written and compile, not tested end-to-end |
 
@@ -34,12 +34,13 @@
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Welcome Screen](screens/welcome.md) | DONE | Welcome and landing screen strictly matching Figma _01_welcome.dart | Verified with widget tests and smoke test; rebuilt from Figma .dart export |
-| [Login Screen](screens/login.md) | DONE | Email + password login strictly matching Figma _03_login.dart | Verified with widget tests and live auth flow; rebuilt from Figma .dart export |
-| [Register Screen](screens/register.md) | DRAFT | Email + password registration | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
-| [Onboarding Schedule](screens/onboarding_schedule.md) | DRAFT | Wake time, bedtime picker | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
-| [Onboarding Routine](screens/onboarding_routine.md) | DRAFT | Routine minutes, waking hours calc | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
-| [Onboarding Categories](screens/onboarding_categories.md) | DRAFT | Select categories from the 7 | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
+| [Welcome Screen](screens/welcome.md) | DONE | Welcome and landing screen strictly matching Figma `_01_welcome.dart` | Verified with widget tests; rebuilt from Figma `.dart` export |
+| [Login Screen](screens/login.md) | DONE | Email + password login strictly matching Figma `_03_login.dart` | Verified with widget tests and live auth flow |
+| [Register Screen](screens/register.md) | DONE | Name, email, password, confirm password, terms strictly matching Figma `_02_register.dart` | Verified with widget tests and live auth flow |
+| [Onboarding Schedule](screens/onboarding_schedule.md) | DONE | Wake time & bedtime selector with custom wheel time picker matching Figma `_04_onboarding_schedule.dart` | Verified with widget tests, midnight crossing math, and live API |
+| [Onboarding Routine](screens/onboarding_routine.md) | DONE | Morning & wind-up routine steppers matching Figma `_05_onboarding_routine.dart` | Verified with widget tests, routine math, and live API |
+| [Onboarding Result](screens/onboarding_result.md) | DONE | Daily net hours calculation & breakdown matching Figma `_06_onboarding_result.dart` | Verified with widget tests and router transitions |
+| [Onboarding Categories](screens/onboarding_categories.md) | DONE | Select categories from the 7 matching Figma `_07_choose_categories.dart` | Verified with widget tests and live API |
 | [Today Screen](screens/today.md) | PAUSED | Main screen with timers, planned/remaining | Blocked on Figma design; do not continue |
 | [Plan Screen](screens/plan.md) | DRAFT | Daily planning with hour steppers | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
 | [Summary Screen](screens/summary.md) | PLANNED | End-of-day planned vs actual | Not started |
@@ -49,12 +50,27 @@
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Dio Client](components/dio_client.md) | DONE | HTTP client with JWT interceptor | Multi-platform baseUrl via String.fromEnvironment('API_BASE_URL'), token refresh verified |
-| [App Router](components/app_router.md) | DRAFT | GoRouter with routes | Compiles and passes smoke test, routes point to temporary/placeholder screens |
+| [Dio Client](components/dio_client.md) | DONE | HTTP client with JWT interceptor | Multi-platform baseUrl, token refresh verified |
+| [App Router](components/app_router.md) | DONE | GoRouter with smooth horizontal shared axis and fade-through transitions | Verified with smoke test and live navigation |
 | [Theme System](components/theme_system.md) | DONE | AppColors, AppTextStyles, AppTheme | Extracted from Figma Style Guide |
+| [App Icons](components/app_icons.md) | DONE | Single source of truth for all icons using Material Symbols | Rounded style, weight 400, outlined |
+| [App Transitions](components/app_transitions.md) | DONE | Smooth shared-axis and fade-through page transitions | Uses `animations` package |
+| [App Time Picker](components/app_time_picker.md) | DONE | 3-wheel scrolling wheel time picker dialog (Hour, Minute 5m, AM/PM) | Uses `ListWheelScrollView` with haptic feedback |
+| [App Back Button](components/app_back_button.md) | DONE | Back button with 48dp minimum touch target | Uses `AppIcons.back` |
+| [Step Progress Bar](components/step_progress_bar.md) | DONE | 3-segment pill progress indicator ("YOUR DAY · X OF 3") | Fully responsive |
+| [Tap Field](components/tap_field.md) | DONE | Outlined tap field with floating label and dropdown indicator | 56dp height |
+| [Info Card](components/info_card.md) | DONE | Tinted warm card for calculation summaries | `#EEE8DC` background, 16dp radius |
+| [Pill Stepper](components/pill_stepper.md) | DONE | Stepper pill with 48dp touch targets and minus/plus icons | Clamped to valid limits |
+| [Category Tile](components/category_tile.md) | DONE | Selectable tinted tile with custom checkbox | Full opacity when active, dimmed when inactive |
 | [Primary Button](components/primary_button.md) | DONE | 48dp pill primary CTA button | Built to Figma specs with loading state |
 | [Secondary Button](components/secondary_button.md) | DONE | 48dp pill outlined CTA button | Built to Figma specs |
 | [App Text Field](components/app_text_field.md) | DONE | Outlined text field with floating label | 4dp radius, 56dp height, error styling |
 | [App Password Field](components/app_password_field.md) | DONE | Password field with show/hide toggle | Accessible 48dp toggle target, error styling |
 | [Category Constants](components/category_constants.md) | DONE | 7 fixed categories with colors and icons | Matches project specification categories |
 | [Notification Service](components/notification_service.md) | DRAFT | Local notification helper for timer overtime | Not wired into the app yet |
+
+---
+
+## Next Steps for Tomorrow
+- Rebuild Daily Planning screen (`08_plan_your_day.png`, `_08_plan_your_day.dart`) from Figma designs.
+- Rebuild Remaining screens (`09_today_empty`, `10_today_planned`, `11_timer_running`, `12_timer_overtime`, `13_summary_day_close`, etc.) following the Figma workflow.
