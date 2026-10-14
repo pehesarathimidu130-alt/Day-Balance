@@ -34,7 +34,7 @@
 
 | Doc | Status | Summary | Notes |
 |-----|--------|---------|-------|
-| [Login Screen](screens/login.md) | DONE | Email + password login strictly matching Figma 03_login.png | Verified with widget tests and live backend auth flow |
+| [Login Screen](screens/login.md) | DONE | Email + password login strictly matching Figma _03_login.dart | Verified with widget tests and live auth flow; rebuilt from Figma .dart export |
 | [Register Screen](screens/register.md) | DRAFT | Email + password registration | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
 | [Onboarding Schedule](screens/onboarding_schedule.md) | DRAFT | Wake time, bedtime picker | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |
 | [Onboarding Routine](screens/onboarding_routine.md) | DRAFT | Routine minutes, waking hours calc | TEMPORARY UI invented by the AI, to be rebuilt from my Figma designs |

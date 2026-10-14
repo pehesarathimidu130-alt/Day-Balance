@@ -8,9 +8,9 @@ Location: `/mobile/lib/shared/widgets/app_text_field.dart`
   - Input border radius: 4dp
   - Border colors: normal `AppColors.outline` (`#85897D`), focused `AppColors.primarySage` (`#49664D`), error `AppColors.error` (`#A43B32`)
   - Floating label cut into outline border: `AppTextStyles.caption12`
-  - Input text: `AppTextStyles.body14`
+  - Input text: `AppTextStyles.body16` (16sp Roboto Regular, updated from Figma CodeTea export)
   - Height / Content padding: 56dp height with 16dp horizontal padding
-  - Inline error text support rendered below field with `AppTextStyles.error`
+  - Inline error text support rendered 4dp below field with `AppTextStyles.error`
   - Disabled state support when forms are submitting
 
 ## Notes for the next developer

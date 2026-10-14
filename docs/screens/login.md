@@ -4,6 +4,20 @@ Location: `/mobile/lib/features/auth/presentation/login_screen.dart`
 
 ## Done
 
+- **Rebuild from Figma Flutter Export (`figma/_03_login.dart`)**:
+  - Replaced ad-hoc spacing with exact measurements from CodeTea `.dart` export:
+    - 56dp height Top Bar container with 48dp back button aligned with 24dp screen padding.
+    - 8dp spacing between Top Bar and title.
+    - 8dp spacing between title ("Good to see you.") and subtitle ("Log in and pick up\nwhere you left off.").
+    - 40dp margin below subtitle before input fields.
+    - 24dp vertical gap between Email field and Password field.
+    - 16dp spacing above "Forgot password?".
+    - 32dp total spacing between "Forgot password?" link and the "Log in" primary button.
+    - 16dp margin between "New to Day-Balance?" and "Create an account" secondary button.
+    - 24dp bottom screen margin.
+  - Updated shared `AppTextField` to use 16sp input text and 4dp error message spacing matching the export.
+  - Maintained 100% of existing authentication logic (validation, error messaging, token storage, and routing).
+
 - **Design System & Tokens**:
   - Extracted colors, typography, spacing, and radius tokens from Figma `03_login.png` and `Day-Balance_style_guide.png` into `mobile/lib/core/theme/` (`app_colors.dart`, `app_text_styles.dart`, `app_theme.dart`).
   - Configured Roboto font family across styles with compile-time `const` compatibility.
