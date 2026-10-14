@@ -48,8 +48,8 @@ async function main() {
     console.log(`   Email: ${user.email}`);
     console.log(`   Name:  ${user.displayName}`);
     process.exit(0);
-  } catch (err: any) {
-    if (err.statusCode === 409) {
+  } catch (err) {
+    if ((err as { statusCode?: number }).statusCode === 409) {
       console.log(`ℹ️  User "${TEST_EMAIL}" was already registered concurrently. Nothing to do.`);
       process.exit(0);
     }

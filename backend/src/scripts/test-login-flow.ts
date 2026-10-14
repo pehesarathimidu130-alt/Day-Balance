@@ -2,6 +2,50 @@ import { db } from '../db/connection';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
+interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface UserProfile {
+  id: string;
+  email: string;
+  displayName: string | null;
+  wakeTime: string | null;
+  bedtime: string | null;
+  routineMinutes: number | null;
+  onboardingDone: boolean | null;
+  createdAt: string | Date | null;
+}
+
+interface RegisterResponse {
+  message: string;
+  data: {
+    user: UserProfile;
+    tokens: TokenPair;
+  };
+}
+
+interface LoginResponse {
+  message: string;
+  data: {
+    user: UserProfile;
+    tokens: TokenPair;
+  };
+}
+
+interface RefreshResponse {
+  message: string;
+  data: {
+    tokens: TokenPair;
+  };
+}
+
+interface ErrorResponse {
+  error: string;
+  details?: Record<string, string[]>;
+}
+
 async function testLoginFlow() {
   console.log('=== Backend Auth & Login Flow Live Verification ===\n');
 
@@ -23,7 +67,7 @@ async function testLoginFlow() {
     }),
   });
 
-  const regData: any = await regRes.json();
+  const regData = (await regRes.json()) as RegisterResponse;
   if (regRes.status !== 201) {
     throw new Error(`Registration failed (${regRes.status}): ${JSON.stringify(regData)}`);
   }
@@ -43,7 +87,7 @@ async function testLoginFlow() {
         password: 'WrongPassword!',
       }),
     });
-    const wrongData: any = await wrongRes.json();
+    const wrongData = (await wrongRes.json()) as ErrorResponse;
     console.log(`✓ Received status ${wrongRes.status} (expected 401).`);
     console.log(`✓ Error response: "${wrongData.error}"`);
     if (wrongRes.status !== 401 || wrongData.error !== 'Invalid email or password') {
@@ -60,7 +104,7 @@ async function testLoginFlow() {
         password: testPassword,
       }),
     });
-    const loginData: any = await loginRes.json();
+    const loginData = (await loginRes.json()) as LoginResponse;
     if (loginRes.status !== 200) {
       throw new Error(`Login failed (${loginRes.status}): ${JSON.stringify(loginData)}`);
     }
@@ -79,7 +123,7 @@ async function testLoginFlow() {
         refreshToken: loginData.data.tokens.refreshToken,
       }),
     });
-    const refreshData: any = await refreshRes.json();
+    const refreshData = (await refreshRes.json()) as RefreshResponse;
     if (refreshRes.status !== 200) {
       throw new Error(`Refresh failed (${refreshRes.status}): ${JSON.stringify(refreshData)}`);
     }
